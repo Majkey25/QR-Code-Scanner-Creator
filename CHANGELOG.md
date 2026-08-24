@@ -6,7 +6,7 @@
 
 - QR scanning from images selected with Android Photo Picker.
 - Unobtrusive adaptive banner ads and scan-completion interstitials capped at one every five minutes.
-- One-time QR Premium purchase and restore through the user's Google Play account.
+- Monthly and lifetime QR Premium purchase options with restore through the user's Google Play account.
 - Google UMP consent and in-app ad privacy controls.
 
 ### Fixed

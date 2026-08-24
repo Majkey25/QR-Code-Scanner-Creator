@@ -38,6 +38,11 @@ class MonetizationPolicyTest {
                 listOf(PremiumPurchase(setOf(PREMIUM_PRODUCT_ID), PremiumPurchaseState.Purchased)),
             ),
         )
+        assertTrue(
+            hasPremiumEntitlement(
+                listOf(PremiumPurchase(setOf(PREMIUM_MONTHLY_PRODUCT_ID), PremiumPurchaseState.Purchased)),
+            ),
+        )
         assertFalse(
             hasPremiumEntitlement(
                 listOf(PremiumPurchase(setOf(PREMIUM_PRODUCT_ID), PremiumPurchaseState.Pending)),
@@ -54,7 +59,7 @@ class MonetizationPolicyTest {
     fun pendingPurchaseStaysLocked() {
         val entitlement =
             resolvePremiumEntitlement(
-                listOf(PremiumPurchase(setOf(PREMIUM_PRODUCT_ID), PremiumPurchaseState.Pending)),
+                listOf(PremiumPurchase(setOf(PREMIUM_MONTHLY_PRODUCT_ID), PremiumPurchaseState.Pending)),
             )
 
         assertFalse(entitlement.premium)

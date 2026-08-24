@@ -24,7 +24,7 @@ Soukromí
 Zdarma a Premium
 • Bezplatná verze obsahuje střídmé bannerové reklamy.
 • Celoobrazovková reklama se zobrazí jen po dokončeném skenu a nejvýše jednou za pět minut.
-• Jednorázové QR Premium odstraní všechny reklamy přes váš účet Google Play.
+• Vyberte měsíční Premium nebo jeden doživotní nákup přes účet Google Play.
 • Kde je to vyžadováno, aplikace nabízí souhlas Googlu a nastavení soukromí reklam.
 
 Vyžaduje Android 10 nebo novější.

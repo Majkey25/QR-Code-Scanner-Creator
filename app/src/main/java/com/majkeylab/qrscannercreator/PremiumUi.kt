@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -57,15 +58,26 @@ internal fun PremiumPanel() {
                     !state.checking && !state.purchaseAvailable ->
                         Text(stringResource(R.string.premium_unavailable))
                 }
-                Button(
-                    onClick = { PremiumController.launchPurchase(activity) },
-                    enabled = state.purchaseAvailable && !state.pending && !state.checking,
+                OutlinedButton(
+                    onClick = { PremiumController.launchPurchase(activity, PremiumPlan.Monthly) },
+                    enabled = state.monthlyAvailable && !state.pending && !state.checking,
                     modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp),
                 ) {
                     Text(
-                        state.formattedPrice?.let {
-                            stringResource(R.string.premium_buy_price, it)
-                        } ?: stringResource(R.string.premium_buy),
+                        state.monthlyPrice?.let {
+                            stringResource(R.string.premium_monthly_price, it)
+                        } ?: stringResource(R.string.premium_monthly),
+                    )
+                }
+                Button(
+                    onClick = { PremiumController.launchPurchase(activity, PremiumPlan.Lifetime) },
+                    enabled = state.lifetimeAvailable && !state.pending && !state.checking,
+                    modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp),
+                ) {
+                    Text(
+                        state.lifetimePrice?.let {
+                            stringResource(R.string.premium_lifetime_price, it)
+                        } ?: stringResource(R.string.premium_lifetime),
                     )
                 }
                 TextButton(

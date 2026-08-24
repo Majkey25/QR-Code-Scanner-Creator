@@ -1,7 +1,14 @@
 package com.majkeylab.qrscannercreator
 
 internal const val PREMIUM_PRODUCT_ID = "qr_scanner_creator_premium"
+internal const val PREMIUM_MONTHLY_PRODUCT_ID = "qr_scanner_creator_premium_monthly"
+internal val PREMIUM_PRODUCT_IDS = setOf(PREMIUM_PRODUCT_ID, PREMIUM_MONTHLY_PRODUCT_ID)
 private const val INTERSTITIAL_COOLDOWN_MILLIS = 300_000L
+
+internal enum class PremiumPlan(val productId: String) {
+    Monthly(PREMIUM_MONTHLY_PRODUCT_ID),
+    Lifetime(PREMIUM_PRODUCT_ID),
+}
 
 internal fun isInterstitialDue(
     completedScans: Int,
@@ -36,7 +43,7 @@ internal data class PremiumEntitlement(
 
 internal fun hasPremiumEntitlement(purchases: List<PremiumPurchase>): Boolean =
     purchases.any {
-        it.state == PremiumPurchaseState.Purchased && PREMIUM_PRODUCT_ID in it.productIds
+        it.state == PremiumPurchaseState.Purchased && it.productIds.any(PREMIUM_PRODUCT_IDS::contains)
     }
 
 internal fun resolvePremiumEntitlement(purchases: List<PremiumPurchase>): PremiumEntitlement =
@@ -44,7 +51,7 @@ internal fun resolvePremiumEntitlement(purchases: List<PremiumPurchase>): Premiu
         premium = hasPremiumEntitlement(purchases),
         pending =
             purchases.any {
-                it.state == PremiumPurchaseState.Pending && PREMIUM_PRODUCT_ID in it.productIds
+                it.state == PremiumPurchaseState.Pending && it.productIds.any(PREMIUM_PRODUCT_IDS::contains)
             },
     )
 
@@ -53,7 +60,12 @@ internal data class PremiumState(
     val entitlementVerified: Boolean = false,
     val checking: Boolean = true,
     val pending: Boolean = false,
-    val formattedPrice: String? = null,
-    val purchaseAvailable: Boolean = false,
+    val monthlyPrice: String? = null,
+    val monthlyAvailable: Boolean = false,
+    val lifetimePrice: String? = null,
+    val lifetimeAvailable: Boolean = false,
     val error: Boolean = false,
-)
+) {
+    val purchaseAvailable: Boolean
+        get() = monthlyAvailable || lifetimeAvailable
+}

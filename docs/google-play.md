@@ -5,7 +5,8 @@
 - Category: Tools
 - Price: Free
 - Ads: Yes; adaptive banners and scan-completion interstitials
-- In-app product: `qr_scanner_creator_premium`; one-time ad removal through Google Play
+- One-time product: `qr_scanner_creator_premium`; planned Czech base price 149 Kč
+- Subscription: `qr_scanner_creator_premium_monthly`; monthly auto-renewing base plan; planned Czech base price 29 Kč/month
 - Target audience: 13 and older; not designed for children
 - Data collected/shared by Google Mobile Ads: approximate location from IP address, app interactions, diagnostics, device or account identifiers
 - Data purposes: advertising or marketing, analytics, fraud prevention, security, and compliance

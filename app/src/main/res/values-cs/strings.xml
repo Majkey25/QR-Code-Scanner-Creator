@@ -97,10 +97,12 @@
     <string name="advertisement">Reklama</string>
     <string name="privacy_options">Nastavení soukromí reklam</string>
     <string name="premium_title">QR Premium</string>
-    <string name="premium_description">Jedním nákupem odstraníte všechny reklamy. Premium zůstane propojené s vaším účtem Google Play.</string>
+    <string name="premium_description">Odstraňte všechny reklamy měsíčně nebo jednorázově navždy. Premium zůstane propojené s vaším účtem Google Play.</string>
     <string name="premium_active">Premium je aktivní · Reklamy jsou odstraněné</string>
-    <string name="premium_buy">Získat Premium</string>
-    <string name="premium_buy_price">Získat Premium · %1$s</string>
+    <string name="premium_monthly">Premium měsíčně</string>
+    <string name="premium_monthly_price">Měsíčně · %1$s</string>
+    <string name="premium_lifetime">Premium navždy</string>
+    <string name="premium_lifetime_price">Navždy · jednorázově %1$s</string>
     <string name="premium_restore">Obnovit nákup</string>
     <string name="premium_pending">Nákup čeká na dokončení v Google Play</string>
     <string name="premium_unavailable">Premium teď není v Google Play dostupné.</string>

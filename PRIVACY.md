@@ -24,7 +24,7 @@ See [Google's advertising privacy information](https://policies.google.com/techn
 
 ## QR Premium purchases
 
-QR Premium is a one-time purchase handled by Google Play. The app queries Google Play for the product and current purchase state, and receives the product ID, purchase status, and purchase token needed to unlock and acknowledge Premium. Payment details are handled by Google and are not available to the developer. The app has no purchase backend and does not transmit purchase records to one.
+QR Premium is offered as an auto-renewing monthly subscription or a one-time lifetime purchase handled by Google Play. A subscription renews until you cancel it in Google Play. The app queries Google Play for the products and current purchase states, and receives the product ID, purchase status, and purchase token needed to unlock and acknowledge Premium. Payment details are handled by Google and are not available to the developer. The app has no purchase backend and does not transmit purchase records to one.
 
 See [Google Play's privacy notice](https://policies.google.com/privacy).
 
