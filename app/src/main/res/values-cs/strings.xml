@@ -73,6 +73,7 @@
     <string name="show_appearance">Zobrazit možnosti vzhledu</string>
     <string name="hide_appearance">Skrýt možnosti vzhledu</string>
     <string name="foreground_color">Barva modulů</string>
+    <string name="quick_colors">Rychlé barvy</string>
     <string name="finder_color">Barva rohů</string>
     <string name="background_color">Barva pozadí</string>
     <string name="module_style">Tvar modulů</string>

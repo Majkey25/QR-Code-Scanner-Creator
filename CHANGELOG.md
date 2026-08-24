@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.0.1 - 2026-08-24
+
+### Changed
+
+- Refined the interface with contextual Material You gradients, compact floating navigation, clearer surfaces, responsive QR preview, and improved scanner controls.
+
+### Fixed
+
+- Improved contrast and touch targets across phone, tablet, light, and dark layouts.
+
 ## 1.0.0 - 2026-08-24
 
 ### Added

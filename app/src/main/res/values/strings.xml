@@ -73,6 +73,7 @@
     <string name="show_appearance">Show appearance options</string>
     <string name="hide_appearance">Hide appearance options</string>
     <string name="foreground_color">Module color</string>
+    <string name="quick_colors">Quick colors</string>
     <string name="finder_color">Corner color</string>
     <string name="background_color">Background color</string>
     <string name="module_style">Module style</string>
