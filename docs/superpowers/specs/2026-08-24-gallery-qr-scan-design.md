@@ -37,6 +37,18 @@ The release gate runs unit tests, Android lint, debug APK assembly, and release 
 
 Version 1.0.2 uses `versionCode = 3`. The change updates the changelog and English and Czech Play release notes. Delivery uses a feature branch, pull request, GitHub Release, and the existing Google Play testing tracks.
 
+## Store screenshots
+
+The store listing uses only screenshots that still match the shipped UI. The outdated scanner permission screenshot is removed because it does not show the new gallery action and cannot be regenerated without a device or emulator.
+
+The remaining screenshots use this order:
+
+1. Scan home screen.
+2. QR creator screen.
+3. About dialog.
+
+The About screenshot stays last because it does not explain the primary scan or create workflows.
+
 ## Acceptance criteria
 
 - **Content type** has sufficient contrast in both themes.
@@ -44,4 +56,5 @@ Version 1.0.2 uses `versionCode = 3`. The change updates the changelog and Engli
 - A valid QR image returns the same result flow as camera scanning.
 - Cancel, unreadable image, and no-QR image paths do not close the scanner.
 - No photo or storage permission is added.
+- The store screenshot order is Scan, Create, About.
 - CI and release workflows pass for version 1.0.2.
