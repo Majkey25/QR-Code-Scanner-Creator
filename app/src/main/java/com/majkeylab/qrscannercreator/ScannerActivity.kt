@@ -4,10 +4,13 @@ import android.Manifest
 import android.app.Activity
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.ImageDecoder
+import android.net.Uri
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageAnalysis
@@ -57,6 +60,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.google.zxing.BarcodeFormat
 import com.google.zxing.BinaryBitmap
@@ -67,13 +71,34 @@ import com.google.zxing.ReaderException
 import com.google.zxing.common.HybridBinarizer
 import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicBoolean
+import kotlin.math.roundToInt
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class ScannerActivity : ComponentActivity() {
     private var cameraGranted by mutableStateOf(false)
+    private var galleryError by mutableStateOf<String?>(null)
 
     private val permissionRequest =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
             cameraGranted = granted
+        }
+
+    private val galleryPicker =
+        registerForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
+            if (uri == null) return@registerForActivityResult
+            galleryError = null
+            lifecycleScope.launch {
+                runCatching { withContext(Dispatchers.IO) { decodeGalleryQr(uri) } }
+                    .onSuccess { raw ->
+                        if (raw == null) {
+                            galleryError = getString(R.string.no_qr_in_image)
+                        } else {
+                            finishWithResult(raw)
+                        }
+                    }.onFailure { galleryError = getString(R.string.image_scan_failed) }
+            }
         }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -84,7 +109,14 @@ class ScannerActivity : ComponentActivity() {
             QrTheme {
                 ScannerScreen(
                     cameraGranted = cameraGranted,
+                    galleryError = galleryError,
                     onRequestCamera = { permissionRequest.launch(Manifest.permission.CAMERA) },
+                    onPickImage = {
+                        galleryError = null
+                        galleryPicker.launch(
+                            PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly),
+                        )
+                    },
                     onResult = ::finishWithResult,
                     onClose = ::finish,
                 )
@@ -100,15 +132,37 @@ class ScannerActivity : ComponentActivity() {
         }
     }
 
+    private fun decodeGalleryQr(uri: Uri): String? {
+        val source = ImageDecoder.createSource(contentResolver, uri)
+        val bitmap =
+            ImageDecoder.decodeBitmap(source) { decoder, info, _ ->
+                decoder.allocator = ImageDecoder.ALLOCATOR_SOFTWARE
+                val largest = maxOf(info.size.width, info.size.height)
+                if (largest > MAX_GALLERY_DIMENSION) {
+                    val scale = MAX_GALLERY_DIMENSION.toDouble() / largest
+                    decoder.setTargetSize(
+                        (info.size.width * scale).roundToInt(),
+                        (info.size.height * scale).roundToInt(),
+                    )
+                }
+            }
+        val pixels = IntArray(bitmap.width * bitmap.height)
+        bitmap.getPixels(pixels, 0, bitmap.width, 0, 0, bitmap.width, bitmap.height)
+        return decodeQrPixels(bitmap.width, bitmap.height, pixels)
+    }
+
     companion object {
         const val EXTRA_RESULT = "qr_result"
+        private const val MAX_GALLERY_DIMENSION = 2048
     }
 }
 
 @Composable
 private fun ScannerScreen(
     cameraGranted: Boolean,
+    galleryError: String?,
     onRequestCamera: () -> Unit,
+    onPickImage: () -> Unit,
     onResult: (String) -> Unit,
     onClose: () -> Unit,
 ) {
@@ -162,11 +216,21 @@ private fun ScannerScreen(
                         fontWeight = FontWeight.SemiBold,
                     )
                     OutlinedButton(
+                        onClick = onPickImage,
+                        border = BorderStroke(1.dp, Color.White),
+                        shape = RoundedCornerShape(16.dp),
+                    ) {
+                        Text(stringResource(R.string.scan_from_gallery), color = Color.White)
+                    }
+                    OutlinedButton(
                         onClick = { manualVisible = true },
                         border = BorderStroke(1.dp, Color.White),
                         shape = RoundedCornerShape(16.dp),
                     ) {
                         Text(stringResource(R.string.enter_content_manually), color = Color.White)
+                    }
+                    galleryError?.let {
+                        Text(it, color = Color(0xFFFFB4AB), style = MaterialTheme.typography.bodySmall)
                     }
                 }
             }
@@ -189,6 +253,7 @@ private fun ScannerScreen(
                 modifier = Modifier.padding(24.dp).widthIn(max = 480.dp).fillMaxWidth(),
                 shape = RoundedCornerShape(32.dp),
                 color = MaterialTheme.colorScheme.surface.copy(alpha = 0.96f),
+                contentColor = MaterialTheme.colorScheme.onSurface,
                 shadowElevation = 8.dp,
             ) {
                 Column(
@@ -227,11 +292,21 @@ private fun ScannerScreen(
                         Text(stringResource(R.string.allow_camera))
                     }
                     OutlinedButton(
+                        onClick = onPickImage,
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(18.dp),
+                    ) {
+                        Text(stringResource(R.string.scan_from_gallery))
+                    }
+                    OutlinedButton(
                         onClick = { manualVisible = true },
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(18.dp),
                     ) {
                         Text(stringResource(R.string.enter_content_manually))
+                    }
+                    galleryError?.let {
+                        Text(it, color = MaterialTheme.colorScheme.error)
                     }
                     TextButton(onClick = onClose, modifier = Modifier.fillMaxWidth()) {
                         Text(stringResource(R.string.scanner_close))

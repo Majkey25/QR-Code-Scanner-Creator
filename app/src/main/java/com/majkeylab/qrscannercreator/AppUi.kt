@@ -267,6 +267,7 @@ private fun ScanScreen(
                 onScan = onScan,
             )
         }
+        item { MonetizationBanner() }
         scanError?.let { error -> item { StatusText(error, isError = true) } }
         actionNotice?.let { notice -> item { StatusText(notice, isError = false) } }
         actionError?.let { error -> item { StatusText(error, isError = true) } }
@@ -339,6 +340,7 @@ private fun ResultPanel(
     Surface(
         shape = RoundedCornerShape(26.dp),
         color = MaterialTheme.colorScheme.surface.copy(alpha = 0.96f),
+        contentColor = MaterialTheme.colorScheme.onSurface,
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.6f)),
         shadowElevation = 2.dp,
     ) {
@@ -478,7 +480,9 @@ private fun AboutDialog(onDismiss: () -> Unit) {
                     style = MaterialTheme.typography.bodySmall,
                 )
                 HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
+                PremiumPanel()
                 AboutLink(R.string.privacy_policy) { uriHandler.openUri(PRIVACY_URL) }
+                PrivacyOptionsLink()
                 AboutLink(R.string.third_party_notices) { uriHandler.openUri(NOTICES_URL) }
                 AboutLink(R.string.source_code) { uriHandler.openUri(SOURCE_URL) }
                 Button(

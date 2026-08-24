@@ -1,7 +1,8 @@
-Scan and create QR codes without ads, accounts, analytics, or tracking.
+Scan QR codes with your camera or from a gallery image, then create and share your own.
 
 Scanner
 • CameraX and ZXing process QR codes locally.
+• Select a QR image with Android Photo Picker.
 • Open safe web links.
 • Connect or save Wi-Fi through Android confirmation.
 • Add contacts and calendar events.
@@ -19,5 +20,11 @@ Privacy
 • Camera frames stay on your device and are not saved.
 • No broad contacts, photo, or storage access.
 • No QR history or cloud backend.
+
+Free & Premium
+• The free version contains restrained banner ads.
+• Full-screen ads appear only after completed scans and no more than once every five minutes.
+• Choose monthly Premium or one lifetime purchase through your Google Play account.
+• Google consent and ad privacy controls are built in where required.
 
 Requires Android 10 or newer.

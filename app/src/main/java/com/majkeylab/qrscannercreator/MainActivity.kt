@@ -34,8 +34,11 @@ class MainActivity : ComponentActivity() {
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             if (result.resultCode == Activity.RESULT_OK) {
                 result.data?.getStringExtra(ScannerActivity.EXTRA_RESULT)?.let { raw ->
-                    scanResult = parseScanResult(raw)
-                    scanError = null
+                    recordCompletedScan(this)
+                    showScanInterstitial(this) {
+                        scanResult = parseScanResult(raw)
+                        scanError = null
+                    }
                 }
             }
         }
@@ -117,6 +120,11 @@ class MainActivity : ComponentActivity() {
                 },
             )
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        PremiumController.refresh(this)
     }
 
     private fun performAction(result: ScanResult) {

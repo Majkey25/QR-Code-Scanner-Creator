@@ -4,17 +4,22 @@
 - Package: com.majkeylab.qrscannercreator
 - Category: Tools
 - Price: Free
-- Ads: No
+- Ads: Yes; adaptive banners and scan-completion interstitials
+- One-time product: `qr_scanner_creator_premium`; planned Czech base price 149 Kč
+- Subscription: `qr_scanner_creator_premium_monthly`; monthly auto-renewing base plan; planned Czech base price 29 Kč/month
 - Target audience: 13 and older; not designed for children
-- Data collected: None
-- Data shared: None
-- Data encrypted in transit: Not applicable; the app has no backend
+- Data collected/shared by Google Mobile Ads: approximate location from IP address, app interactions, diagnostics, device or account identifiers
+- Data purposes: advertising or marketing, analytics, fraud prevention, security, and compliance
+- Data encrypted in transit: Yes
+- Data deletion: Android ad ID controls; local app data can be removed by clearing app data or uninstalling
 - Account creation: None
 - Account deletion: Not applicable
 - Camera: Core scanning feature; frames stay on device and are not saved
 - Contacts: No broad permission; Android picker grants only the chosen phone entry
-- Photos: No broad permission; Android Photo Picker grants only the chosen logo
+- Photos: No broad permission; Android Photo Picker grants only the chosen logo or QR image
 - Storage: No permission; generated PNG uses temporary app cache and Android share sheet
 - Location: No location permission; coordinates can be entered or scanned as text
 - Privacy URL: https://majkey25.github.io/QR-Code-Scanner-Creator/privacy.html
 - Support URL: https://github.com/Majkey25/QR-Code-Scanner-Creator/issues
+- Consent: Google UMP before ad requests where required; privacy-options entry point in About
+- QR data: Not collected or shared by the developer or advertising SDK

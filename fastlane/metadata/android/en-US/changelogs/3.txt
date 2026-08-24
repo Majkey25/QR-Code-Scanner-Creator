@@ -1,0 +1,1 @@
+Scan QR codes from gallery images. Added restrained ads, Google consent controls, and monthly or lifetime QR Premium ad removal. Fixed dark-mode content-type contrast.
