@@ -1,0 +1,1 @@
+Vylepšené Material You rozhraní s kontextovými přechody, čitelnějšími plochami, kompaktní navigací a lepším rozvržením.

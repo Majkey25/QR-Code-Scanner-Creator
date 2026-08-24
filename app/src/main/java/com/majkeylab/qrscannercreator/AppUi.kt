@@ -1,8 +1,10 @@
 package com.majkeylab.qrscannercreator
 
 import android.graphics.Bitmap
+import android.os.Build
 import androidx.annotation.StringRes
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -15,13 +17,14 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.selection.selectableGroup
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -36,12 +39,18 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Shapes
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.Typography
 import androidx.compose.material3.darkColorScheme
+import androidx.compose.material3.dynamicDarkColorScheme
+import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -50,17 +59,20 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 
 private enum class AppTab(@StringRes val label: Int, val icon: Int) {
     SCAN(R.string.scan, R.drawable.ic_qr_code),
-    CREATE(R.string.create, R.drawable.ic_image),
+    CREATE(R.string.create, R.drawable.ic_qr_add),
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -86,96 +98,139 @@ fun QrApp(
         var menuExpanded by remember { mutableStateOf(false) }
         var aboutVisible by remember { mutableStateOf(false) }
 
-        Scaffold(
-            topBar = {
-                CenterAlignedTopAppBar(
-                    title = {
-                        Text(
-                            stringResource(R.string.app_name),
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                            fontWeight = FontWeight.SemiBold,
-                        )
-                    },
-                    actions = {
-                        Box {
-                            IconButton(onClick = { menuExpanded = true }) {
-                                Icon(
-                                    painterResource(R.drawable.ic_more_vert),
-                                    contentDescription = stringResource(R.string.more_options),
-                                )
+        Box(
+            modifier =
+                Modifier.fillMaxSize()
+                    .background(Brush.verticalGradient(tab.backgroundColors())),
+        ) {
+            Scaffold(
+                containerColor = Color.Transparent,
+                topBar = {
+                    CenterAlignedTopAppBar(
+                        colors =
+                            TopAppBarDefaults.topAppBarColors(
+                                containerColor = Color.Transparent,
+                                scrolledContainerColor = Color.Transparent,
+                            ),
+                        title = {
+                            Text(
+                                stringResource(tab.label),
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold,
+                            )
+                        },
+                        actions = {
+                            Box {
+                                Surface(
+                                    shape = CircleShape,
+                                    color = MaterialTheme.colorScheme.surface.copy(alpha = 0.72f),
+                                ) {
+                                    IconButton(onClick = { menuExpanded = true }) {
+                                        Icon(
+                                            painterResource(R.drawable.ic_more_vert),
+                                            contentDescription = stringResource(R.string.more_options),
+                                        )
+                                    }
+                                }
+                                DropdownMenu(
+                                    expanded = menuExpanded,
+                                    onDismissRequest = { menuExpanded = false },
+                                ) {
+                                    DropdownMenuItem(
+                                        text = { Text(stringResource(R.string.about)) },
+                                        onClick = {
+                                            menuExpanded = false
+                                            aboutVisible = true
+                                        },
+                                    )
+                                }
                             }
-                            DropdownMenu(
-                                expanded = menuExpanded,
-                                onDismissRequest = { menuExpanded = false },
-                            ) {
-                                DropdownMenuItem(
-                                    text = { Text(stringResource(R.string.about)) },
-                                    onClick = {
-                                        menuExpanded = false
-                                        aboutVisible = true
-                                    },
-                                )
+                        },
+                    )
+                },
+                bottomBar = {
+                    Box(
+                        modifier =
+                            Modifier.fillMaxWidth()
+                                .navigationBarsPadding()
+                                .padding(horizontal = 24.dp, vertical = 10.dp),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Surface(
+                            modifier = Modifier.widthIn(max = 280.dp).fillMaxWidth(),
+                            color = MaterialTheme.colorScheme.surface.copy(alpha = 0.96f),
+                            shape = RoundedCornerShape(32.dp),
+                            shadowElevation = 2.dp,
+                        ) {
+                            NavigationBar(containerColor = Color.Transparent, tonalElevation = 0.dp) {
+                                AppTab.entries.forEach { option ->
+                                    NavigationBarItem(
+                                        selected = tab == option,
+                                        onClick = { tab = option },
+                                        colors =
+                                            NavigationBarItemDefaults.colors(
+                                                indicatorColor = MaterialTheme.colorScheme.primaryContainer,
+                                            ),
+                                        icon = {
+                                            Icon(
+                                                painterResource(option.icon),
+                                                contentDescription = null,
+                                                modifier = Modifier.size(22.dp),
+                                            )
+                                        },
+                                        label = { Text(stringResource(option.label)) },
+                                    )
+                                }
                             }
                         }
-                    },
-                )
-            },
-            bottomBar = {
-                Column {
-                    HorizontalDivider()
-                    NavigationBar(tonalElevation = 0.dp) {
-                        AppTab.entries.forEach { option ->
-                            NavigationBarItem(
-                                selected = tab == option,
-                                onClick = { tab = option },
-                                icon = {
-                                    Icon(
-                                        painterResource(option.icon),
-                                        contentDescription = null,
-                                        modifier = Modifier.size(22.dp),
-                                    )
-                                },
-                                label = { Text(stringResource(option.label)) },
+                    }
+                },
+            ) { innerPadding ->
+                when (tab) {
+                    AppTab.SCAN ->
+                        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.TopCenter) {
+                            ScanScreen(
+                                result = scanResult,
+                                scanError = scanError,
+                                actionNotice = actionNotice,
+                                actionError = actionError,
+                                onScan = onScan,
+                                onPerformAction = onPerformAction,
+                                onCopy = onCopy,
+                                onShare = onShareText,
+                                contentPadding = innerPadding,
+                                modifier = Modifier.fillMaxHeight().widthIn(max = 680.dp).fillMaxWidth(),
                             )
                         }
-                    }
+                    AppTab.CREATE ->
+                        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.TopCenter) {
+                            CreatorScreen(
+                                pickedPhone = pickedPhone,
+                                pickedLogo = pickedLogo,
+                                onPickPhone = onPickPhone,
+                                onPickLogo = onPickLogo,
+                                onClearLogo = onClearLogo,
+                                onShareImage = onShareImage,
+                                contentPadding = innerPadding,
+                                modifier = Modifier.fillMaxHeight().widthIn(max = 680.dp).fillMaxWidth(),
+                            )
+                        }
                 }
-            },
-        ) { innerPadding ->
-            when (tab) {
-                AppTab.SCAN ->
-                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.TopCenter) {
-                        ScanScreen(
-                            result = scanResult,
-                            scanError = scanError,
-                            actionNotice = actionNotice,
-                            actionError = actionError,
-                            onScan = onScan,
-                            onPerformAction = onPerformAction,
-                            onCopy = onCopy,
-                            onShare = onShareText,
-                            contentPadding = innerPadding,
-                            modifier = Modifier.fillMaxHeight().widthIn(max = 720.dp).fillMaxWidth(),
-                        )
-                    }
-                AppTab.CREATE ->
-                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.TopCenter) {
-                        CreatorScreen(
-                            pickedPhone = pickedPhone,
-                            pickedLogo = pickedLogo,
-                            onPickPhone = onPickPhone,
-                            onPickLogo = onPickLogo,
-                            onClearLogo = onClearLogo,
-                            onShareImage = onShareImage,
-                            contentPadding = innerPadding,
-                            modifier = Modifier.fillMaxHeight().widthIn(max = 720.dp).fillMaxWidth(),
-                        )
-                    }
             }
         }
 
         if (aboutVisible) AboutDialog(onDismiss = { aboutVisible = false })
+    }
+}
+
+@Composable
+private fun AppTab.backgroundColors(): List<Color> {
+    val colors = MaterialTheme.colorScheme
+    return when (this) {
+        AppTab.SCAN -> listOf(colors.primaryContainer, colors.surface, colors.background)
+        AppTab.CREATE -> listOf(colors.secondaryContainer, colors.surface, colors.background)
     }
 }
 
@@ -193,56 +248,29 @@ private fun ScanScreen(
     modifier: Modifier,
 ) {
     LazyColumn(
-        modifier = modifier,
+        modifier =
+            modifier.padding(
+                top = contentPadding.calculateTopPadding(),
+                bottom = contentPadding.calculateBottomPadding(),
+            ),
         contentPadding =
             PaddingValues(
                 start = 24.dp,
-                top = contentPadding.calculateTopPadding() + 28.dp,
+                top = 28.dp,
                 end = 24.dp,
-                bottom = contentPadding.calculateBottomPadding() + 28.dp,
+                bottom = 28.dp,
             ),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         item {
-            Text(
-                stringResource(R.string.scan_title),
-                style = MaterialTheme.typography.headlineLarge,
-                fontWeight = FontWeight.Bold,
-            )
-            Spacer(Modifier.height(8.dp))
-            Text(
-                stringResource(R.string.scan_description),
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                style = MaterialTheme.typography.bodyLarge,
-            )
-        }
-        item {
-            Button(
-                onClick = onScan,
-                modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp),
-                shape = MaterialTheme.shapes.medium,
-            ) {
-                Icon(
-                    painterResource(R.drawable.ic_qr_code),
-                    contentDescription = null,
-                    modifier = Modifier.size(22.dp),
-                )
-                Spacer(Modifier.size(10.dp))
-                Text(stringResource(R.string.scan_button))
-            }
-        }
-        item {
-            Text(
-                stringResource(R.string.scan_privacy),
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                style = MaterialTheme.typography.bodySmall,
+            ScanHero(
+                onScan = onScan,
             )
         }
         scanError?.let { error -> item { StatusText(error, isError = true) } }
         actionNotice?.let { notice -> item { StatusText(notice, isError = false) } }
         actionError?.let { error -> item { StatusText(error, isError = true) } }
         result?.let { scanned ->
-            item { HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp)) }
             item {
                 ResultPanel(
                     result = scanned,
@@ -256,45 +284,108 @@ private fun ScanScreen(
 }
 
 @Composable
+private fun ScanHero(onScan: () -> Unit) {
+    Column(
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 4.dp, vertical = 8.dp),
+        verticalArrangement = Arrangement.spacedBy(14.dp),
+    ) {
+        Surface(
+            shape = CircleShape,
+            color = MaterialTheme.colorScheme.surface.copy(alpha = 0.7f),
+            modifier = Modifier.size(48.dp),
+        ) {
+            Box(contentAlignment = Alignment.Center) {
+                Icon(
+                    painterResource(R.drawable.ic_qr_code),
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(24.dp),
+                )
+            }
+        }
+        Text(
+            stringResource(R.string.scan_title),
+            style = MaterialTheme.typography.headlineMedium,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.onBackground,
+        )
+        Text(
+            stringResource(R.string.scan_description),
+            color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.78f),
+            style = MaterialTheme.typography.bodyMedium,
+        )
+        Button(
+            onClick = onScan,
+            modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp),
+            shape = RoundedCornerShape(18.dp),
+        ) {
+            Text(stringResource(R.string.scan_button), fontWeight = FontWeight.SemiBold)
+        }
+        Text(
+            stringResource(R.string.scan_privacy),
+            color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.72f),
+            style = MaterialTheme.typography.bodySmall,
+        )
+    }
+}
+
+@Composable
 private fun ResultPanel(
     result: ScanResult,
     onPrimary: () -> Unit,
     onCopy: () -> Unit,
     onShare: () -> Unit,
 ) {
-    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        Text(
-            stringResource(R.string.scan_result),
-            style = MaterialTheme.typography.labelLarge,
-            color = MaterialTheme.colorScheme.primary,
-        )
-        Text(
-            result.title(),
-            style = MaterialTheme.typography.titleLarge,
-            fontWeight = FontWeight.SemiBold,
-        )
-        Text(
-            result.summary(),
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            style = MaterialTheme.typography.bodyLarge,
-        )
-        Button(
-            onClick = onPrimary,
-            modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp),
+    Surface(
+        shape = RoundedCornerShape(26.dp),
+        color = MaterialTheme.colorScheme.surface.copy(alpha = 0.96f),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.6f)),
+        shadowElevation = 2.dp,
+    ) {
+        Column(
+            modifier = Modifier.padding(20.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            Text(stringResource(result.action.label()))
-        }
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-        ) {
-            if (result.action != ScanAction.COPY) {
-                OutlinedButton(onClick = onCopy, modifier = Modifier.weight(1f)) {
-                    Text(stringResource(R.string.copy))
-                }
+            Text(
+                stringResource(R.string.scan_result),
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.primary,
+            )
+            Text(
+                result.title(),
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.SemiBold,
+            )
+            Text(
+                result.summary(),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                style = MaterialTheme.typography.bodyLarge,
+            )
+            Button(
+                onClick = onPrimary,
+                modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp),
+                shape = RoundedCornerShape(16.dp),
+            ) {
+                Text(stringResource(result.action.label()))
             }
-            OutlinedButton(onClick = onShare, modifier = Modifier.weight(1f)) {
-                Text(stringResource(R.string.share))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
+                if (result.action != ScanAction.COPY) {
+                    OutlinedButton(
+                        onClick = onCopy,
+                        modifier = Modifier.weight(1f).heightIn(min = 48.dp),
+                    ) {
+                        Text(stringResource(R.string.copy))
+                    }
+                }
+                OutlinedButton(
+                    onClick = onShare,
+                    modifier = Modifier.weight(1f).heightIn(min = 48.dp),
+                ) {
+                    Text(stringResource(R.string.share))
+                }
             }
         }
     }
@@ -302,11 +393,27 @@ private fun ResultPanel(
 
 @Composable
 private fun StatusText(text: String, isError: Boolean) {
-    Text(
-        text,
-        color = if (isError) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary,
-        style = MaterialTheme.typography.bodyMedium,
-    )
+    Surface(
+        shape = RoundedCornerShape(16.dp),
+        color =
+            if (isError) {
+                MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.9f)
+            } else {
+                MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.9f)
+            },
+    ) {
+        Text(
+            text,
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
+            color =
+                if (isError) {
+                    MaterialTheme.colorScheme.onErrorContainer
+                } else {
+                    MaterialTheme.colorScheme.onPrimaryContainer
+                },
+            style = MaterialTheme.typography.bodyMedium,
+        )
+    }
 }
 
 @Composable
@@ -395,6 +502,9 @@ private fun AboutDialog(onDismiss: () -> Unit) {
             }
         },
         confirmButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.close)) } },
+        shape = RoundedCornerShape(30.dp),
+        containerColor = MaterialTheme.colorScheme.surface,
+        tonalElevation = 6.dp,
     )
 }
 
@@ -407,25 +517,66 @@ private fun AboutLink(@StringRes label: Int, onClick: () -> Unit) {
 
 @Composable
 internal fun QrTheme(content: @Composable () -> Unit) {
+    val dark = isSystemInDarkTheme()
+    val context = LocalContext.current
     val colors =
-        if (isSystemInDarkTheme()) {
-            darkColorScheme(
-                primary = Color(0xFFADC6FF),
-                onPrimary = Color(0xFF002E69),
-                background = Color(0xFF111318),
-                surface = Color(0xFF111318),
-                surfaceVariant = Color(0xFF25272D),
-            )
-        } else {
-            lightColorScheme(
-                primary = Color(0xFF0B57F0),
-                onPrimary = Color.White,
-                background = Color.White,
-                surface = Color.White,
-                surfaceVariant = Color(0xFFF3F4F7),
-            )
+        when {
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && dark -> dynamicDarkColorScheme(context)
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> dynamicLightColorScheme(context)
+            dark ->
+                darkColorScheme(
+                    primary = Color(0xFFB8C4FF),
+                    onPrimary = Color(0xFF16265F),
+                    primaryContainer = Color(0xFF303F78),
+                    tertiaryContainer = Color(0xFF324B4B),
+                    background = Color(0xFF111318),
+                    surface = Color(0xFF181A20),
+                    surfaceVariant = Color(0xFF292B32),
+                )
+            else ->
+                lightColorScheme(
+                    primary = Color(0xFF3857A6),
+                    onPrimary = Color.White,
+                    primaryContainer = Color(0xFFDDE4FF),
+                    tertiary = Color(0xFF3F6361),
+                    tertiaryContainer = Color(0xFFC1E8E4),
+                    background = Color(0xFFFFFBFF),
+                    surface = Color(0xFFFFFBFF),
+                    surfaceVariant = Color(0xFFE8E8F0),
+                )
         }
-    MaterialTheme(colorScheme = colors, content = content)
+    val shapes =
+        Shapes(
+            extraSmall = RoundedCornerShape(8.dp),
+            small = RoundedCornerShape(12.dp),
+            medium = RoundedCornerShape(18.dp),
+            large = RoundedCornerShape(26.dp),
+            extraLarge = RoundedCornerShape(32.dp),
+        )
+    val typography =
+        Typography(
+            headlineLarge =
+                MaterialTheme.typography.headlineLarge.copy(
+                    fontSize = 32.sp,
+                    lineHeight = 36.sp,
+                    fontWeight = FontWeight.Bold,
+                    letterSpacing = (-0.6).sp,
+                ),
+            headlineMedium =
+                MaterialTheme.typography.headlineMedium.copy(
+                    fontSize = 29.sp,
+                    lineHeight = 34.sp,
+                    fontWeight = FontWeight.Bold,
+                    letterSpacing = (-0.4).sp,
+                ),
+            titleLarge = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.SemiBold),
+        )
+    MaterialTheme(
+        colorScheme = colors,
+        shapes = shapes,
+        typography = typography,
+        content = content,
+    )
 }
 
 private const val SOURCE_URL = "https://github.com/Majkey25/QR-Code-Scanner-Creator"

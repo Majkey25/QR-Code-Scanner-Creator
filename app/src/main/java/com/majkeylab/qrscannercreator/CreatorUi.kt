@@ -4,28 +4,38 @@ import android.app.DatePickerDialog
 import android.app.TimePickerDialog
 import android.graphics.Bitmap
 import androidx.annotation.StringRes
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.FilterChip
-import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Switch
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -36,10 +46,18 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -130,45 +148,50 @@ fun CreatorScreen(
     }
 
     LazyColumn(
-        modifier = modifier,
+        modifier =
+            modifier.padding(
+                top = contentPadding.calculateTopPadding(),
+                bottom = contentPadding.calculateBottomPadding(),
+            ),
         contentPadding =
             PaddingValues(
                 start = 24.dp,
-                top = contentPadding.calculateTopPadding() + 28.dp,
+                top = 28.dp,
                 end = 24.dp,
-                bottom = contentPadding.calculateBottomPadding() + 28.dp,
+                bottom = 28.dp,
             ),
         verticalArrangement = Arrangement.spacedBy(18.dp),
     ) {
         item {
-            Text(
-                stringResource(R.string.create_title),
-                style = MaterialTheme.typography.headlineLarge,
-                fontWeight = FontWeight.Bold,
-            )
-            Spacer(Modifier.height(8.dp))
-            Text(
-                stringResource(R.string.create_description),
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                style = MaterialTheme.typography.bodyLarge,
-            )
+            CreatorHero()
         }
         item {
-            Text(stringResource(R.string.content_type), style = MaterialTheme.typography.labelLarge)
-            Spacer(Modifier.height(8.dp))
-            LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                items(CreatorType.entries.size) { index ->
-                    val option = CreatorType.entries[index]
-                    FilterChip(
-                        selected = form.type == option,
-                        onClick = { update(form.copy(type = option)) },
-                        label = { Text(stringResource(option.label)) },
-                    )
+            Surface(
+                shape = RoundedCornerShape(26.dp),
+                color = MaterialTheme.colorScheme.surface.copy(alpha = 0.96f),
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.55f)),
+                shadowElevation = 2.dp,
+            ) {
+                Column(
+                    modifier = Modifier.padding(20.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp),
+                ) {
+                    Text(stringResource(R.string.content_type), style = MaterialTheme.typography.labelLarge)
+                    LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        items(CreatorType.entries.size) { index ->
+                            val option = CreatorType.entries[index]
+                            FilterChip(
+                                selected = form.type == option,
+                                onClick = { update(form.copy(type = option)) },
+                                shape = RoundedCornerShape(14.dp),
+                                label = { Text(stringResource(option.label)) },
+                            )
+                        }
+                    }
+                    CreatorFields(form = form, onChange = ::update, onPickPhone = onPickPhone)
                 }
             }
         }
-        item { CreatorFields(form = form, onChange = ::update, onPickPhone = onPickPhone) }
-        item { HorizontalDivider(modifier = Modifier.padding(top = 4.dp)) }
         item {
             AppearanceFields(
                 form = form,
@@ -205,47 +228,105 @@ fun CreatorScreen(
                     }
                 },
                 modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp),
-                shape = MaterialTheme.shapes.medium,
+                shape = RoundedCornerShape(18.dp),
             ) {
-                Text(stringResource(R.string.generate_qr))
+                Text(stringResource(R.string.generate_qr), fontWeight = FontWeight.SemiBold)
             }
         }
         error?.let { message ->
             item {
-                Text(
-                    message,
-                    color = MaterialTheme.colorScheme.error,
-                    style = MaterialTheme.typography.bodyMedium,
-                )
+                Surface(
+                    shape = RoundedCornerShape(16.dp),
+                    color = MaterialTheme.colorScheme.errorContainer,
+                ) {
+                    Text(
+                        message,
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
+                        color = MaterialTheme.colorScheme.onErrorContainer,
+                        style = MaterialTheme.typography.bodyMedium,
+                    )
+                }
             }
         }
         generated?.let { image ->
             item {
                 val preview = remember(image) { image.toBitmap().asImageBitmap() }
-                Column(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(14.dp),
+                Surface(
+                    shape = RoundedCornerShape(28.dp),
+                    color = MaterialTheme.colorScheme.surface.copy(alpha = 0.96f),
+                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.55f)),
+                    shadowElevation = 2.dp,
                 ) {
-                    Text(
-                        stringResource(R.string.preview),
-                        modifier = Modifier.fillMaxWidth(),
-                        style = MaterialTheme.typography.titleMedium,
-                    )
-                    Image(
-                        bitmap = preview,
-                        contentDescription = stringResource(R.string.qr_preview),
-                        modifier = Modifier.size(280.dp),
-                    )
-                    OutlinedButton(
-                        onClick = { onShareImage(image) },
-                        modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp),
+                    Column(
+                        modifier = Modifier.fillMaxWidth().padding(20.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(16.dp),
                     ) {
-                        Text(stringResource(R.string.share_qr_code))
+                        Text(
+                            stringResource(R.string.preview),
+                            modifier = Modifier.fillMaxWidth(),
+                            style = MaterialTheme.typography.titleLarge,
+                        )
+                        Box(
+                            modifier =
+                                Modifier.fillMaxWidth()
+                                    .widthIn(max = 280.dp)
+                                    .aspectRatio(1f)
+                                    .clip(RoundedCornerShape(22.dp))
+                                    .background(Color.White)
+                                    .padding(12.dp),
+                        ) {
+                            Image(
+                                bitmap = preview,
+                                contentDescription = stringResource(R.string.qr_preview),
+                                modifier = Modifier.fillMaxSize(),
+                            )
+                        }
+                        OutlinedButton(
+                            onClick = { onShareImage(image) },
+                            modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp),
+                            shape = RoundedCornerShape(16.dp),
+                        ) {
+                            Text(stringResource(R.string.share_qr_code))
+                        }
                     }
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun CreatorHero() {
+    Column(
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 4.dp, vertical = 8.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        Surface(
+            shape = CircleShape,
+            color = MaterialTheme.colorScheme.surface.copy(alpha = 0.7f),
+            modifier = Modifier.size(48.dp),
+        ) {
+            Box(contentAlignment = Alignment.Center) {
+                Icon(
+                    painterResource(R.drawable.ic_qr_add),
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(24.dp),
+                )
+            }
+        }
+        Text(
+            stringResource(R.string.create_title),
+            style = MaterialTheme.typography.headlineMedium,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.onBackground,
+        )
+        Text(
+            stringResource(R.string.create_description),
+            color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.78f),
+            style = MaterialTheme.typography.bodyMedium,
+        )
     }
 }
 
@@ -286,6 +367,7 @@ private fun CreatorFields(
                         singleLine = true,
                         visualTransformation = PasswordVisualTransformation(),
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                        shape = RoundedCornerShape(18.dp),
                     )
                 }
                 Text(stringResource(R.string.security), style = MaterialTheme.typography.labelLarge)
@@ -294,22 +376,33 @@ private fun CreatorFields(
                         selected = form.wifiSecurity == WifiSecurity.WPA,
                         onClick = { onChange(form.copy(wifiSecurity = WifiSecurity.WPA)) },
                         label = { Text(stringResource(R.string.wpa_network)) },
+                        shape = RoundedCornerShape(14.dp),
                     )
                     FilterChip(
                         selected = form.wifiSecurity == WifiSecurity.OPEN,
                         onClick = { onChange(form.copy(wifiSecurity = WifiSecurity.OPEN)) },
                         label = { Text(stringResource(R.string.open_network)) },
+                        shape = RoundedCornerShape(14.dp),
                     )
                 }
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier =
+                        Modifier.fillMaxWidth()
+                            .clip(RoundedCornerShape(16.dp))
+                            .toggleable(
+                                value = form.wifiHidden,
+                                role = Role.Switch,
+                                onValueChange = { onChange(form.copy(wifiHidden = it)) },
+                            )
+                            .padding(horizontal = 8.dp, vertical = 4.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween,
                 ) {
                     Text(stringResource(R.string.hidden_network))
                     Switch(
                         checked = form.wifiHidden,
-                        onCheckedChange = { onChange(form.copy(wifiHidden = it)) },
+                        onCheckedChange = null,
+                        modifier = Modifier.clearAndSetSemantics {},
                     )
                 }
             }
@@ -428,49 +521,96 @@ private fun AppearanceFields(
     onPickLogo: () -> Unit,
     onClearLogo: () -> Unit,
 ) {
-    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        TextButton(onClick = { onExpandedChange(!expanded) }, modifier = Modifier.fillMaxWidth()) {
-            Text(
-                stringResource(if (expanded) R.string.hide_appearance else R.string.show_appearance),
-                modifier = Modifier.fillMaxWidth(),
-            )
-        }
-        if (expanded) {
-            Text(stringResource(R.string.appearance), style = MaterialTheme.typography.titleMedium)
-            QrField(
-                value = form.foreground,
-                label = R.string.foreground_color,
-                onValueChange = { onChange(form.copy(foreground = it.uppercase())) },
-            )
-            QrField(
-                value = form.finder,
-                label = R.string.finder_color,
-                onValueChange = { onChange(form.copy(finder = it.uppercase())) },
-            )
-            QrField(
-                value = form.background,
-                label = R.string.background_color,
-                onValueChange = { onChange(form.copy(background = it.uppercase())) },
-            )
-            ShapePicker(
-                label = R.string.module_style,
-                selected = form.moduleShape,
-                onSelected = { onChange(form.copy(moduleShape = it)) },
-            )
-            ShapePicker(
-                label = R.string.corner_style,
-                selected = form.finderShape,
-                onSelected = { onChange(form.copy(finderShape = it)) },
-            )
-            Text(stringResource(R.string.logo), style = MaterialTheme.typography.labelLarge)
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                OutlinedButton(onClick = onPickLogo, modifier = Modifier.weight(1f)) {
-                    Text(stringResource(if (hasLogo) R.string.logo_selected else R.string.choose_logo))
-                }
-                if (hasLogo) {
-                    TextButton(onClick = onClearLogo) { Text(stringResource(R.string.remove_logo)) }
+    Surface(
+        shape = RoundedCornerShape(24.dp),
+        color = MaterialTheme.colorScheme.surface.copy(alpha = 0.96f),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)),
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            TextButton(onClick = { onExpandedChange(!expanded) }, modifier = Modifier.fillMaxWidth()) {
+                Text(
+                    stringResource(if (expanded) R.string.hide_appearance else R.string.show_appearance),
+                    modifier = Modifier.fillMaxWidth(),
+                    fontWeight = FontWeight.SemiBold,
+                )
+            }
+            if (expanded) {
+                Text(stringResource(R.string.appearance), style = MaterialTheme.typography.titleMedium)
+                ColorSwatches(
+                    selected = form.foreground,
+                    onSelected = { onChange(form.copy(foreground = it)) },
+                )
+                QrField(
+                    value = form.foreground,
+                    label = R.string.foreground_color,
+                    onValueChange = { onChange(form.copy(foreground = it.uppercase())) },
+                )
+                QrField(
+                    value = form.finder,
+                    label = R.string.finder_color,
+                    onValueChange = { onChange(form.copy(finder = it.uppercase())) },
+                )
+                QrField(
+                    value = form.background,
+                    label = R.string.background_color,
+                    onValueChange = { onChange(form.copy(background = it.uppercase())) },
+                )
+                ShapePicker(
+                    label = R.string.module_style,
+                    selected = form.moduleShape,
+                    onSelected = { onChange(form.copy(moduleShape = it)) },
+                )
+                ShapePicker(
+                    label = R.string.corner_style,
+                    selected = form.finderShape,
+                    onSelected = { onChange(form.copy(finderShape = it)) },
+                )
+                Text(stringResource(R.string.logo), style = MaterialTheme.typography.labelLarge)
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    OutlinedButton(onClick = onPickLogo, modifier = Modifier.weight(1f)) {
+                        Text(stringResource(if (hasLogo) R.string.logo_selected else R.string.choose_logo))
+                    }
+                    if (hasLogo) {
+                        TextButton(onClick = onClearLogo) { Text(stringResource(R.string.remove_logo)) }
+                    }
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun ColorSwatches(
+    selected: String,
+    onSelected: (String) -> Unit,
+) {
+    Text(stringResource(R.string.quick_colors), style = MaterialTheme.typography.labelLarge)
+    LazyRow(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+        items(PRESET_COLORS.size) { index ->
+            val value = PRESET_COLORS[index]
+            Surface(
+                modifier =
+                    Modifier.size(40.dp)
+                        .semantics {
+                            contentDescription = value
+                            role = Role.Button
+                        }
+                        .clickable { onSelected(value) },
+                shape = CircleShape,
+                color = value.toComposeColor(),
+                border =
+                    BorderStroke(
+                        if (value.equals(selected, ignoreCase = true)) 3.dp else 1.dp,
+                        if (value.equals(selected, ignoreCase = true)) {
+                            MaterialTheme.colorScheme.primary
+                        } else {
+                            MaterialTheme.colorScheme.outlineVariant
+                        },
+                    ),
+            ) {}
         }
     }
 }
@@ -488,6 +628,7 @@ private fun ShapePicker(
             FilterChip(
                 selected = selected == shape,
                 onClick = { onSelected(shape) },
+                shape = RoundedCornerShape(14.dp),
                 label = {
                     Text(
                         stringResource(
@@ -520,6 +661,7 @@ private fun QrField(
         singleLine = singleLine,
         minLines = if (singleLine) 1 else 3,
         keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
+        shape = RoundedCornerShape(18.dp),
     )
 }
 
@@ -549,6 +691,7 @@ private fun DateTimeButton(
             ).show()
         },
         modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp),
+        shape = RoundedCornerShape(16.dp),
     ) {
         Text("${stringResource(label)}: ${value.format(DISPLAY_DATE_TIME)}")
     }
@@ -575,3 +718,6 @@ private fun CreatorForm.toDraft(): QrDraft =
     }
 
 private val DISPLAY_DATE_TIME: DateTimeFormatter = DateTimeFormatter.ofPattern("d MMM yyyy, HH:mm")
+private val PRESET_COLORS = listOf("#111111", "#3857A6", "#5B4BB7", "#0F766E", "#C2410C", "#B42318")
+
+private fun String.toComposeColor(): Color = Color(("FF" + removePrefix("#")).toLong(16))
