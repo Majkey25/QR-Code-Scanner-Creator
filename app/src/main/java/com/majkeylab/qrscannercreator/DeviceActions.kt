@@ -115,7 +115,6 @@ private fun Context.copy(value: String) {
 }
 
 private fun Context.launch(intent: Intent): ActionOutcome {
-    require(intent.resolveActivity(packageManager) != null) { "No compatible app is installed" }
     startActivity(intent)
     return ActionOutcome.STARTED
 }

@@ -14,7 +14,7 @@ Build a free Kotlin Android app for Android 10 and newer. It scans QR codes, tur
 
 ## Scanner
 
-Use Google Code Scanner 16.1.0 for camera scanning. This keeps camera access inside Google Play services and avoids a `CAMERA` permission. Accept QR codes only, enable auto zoom, and allow manual entry.
+Use bundled CameraX 1.6.1 with ZXing 3.5.4. Ask for camera permission only when the scanner opens, process frames locally, accept QR codes only, and include manual content entry for camera-less devices and accessibility.
 
 Map typed ML Kit results to native actions:
 
@@ -36,12 +36,12 @@ Build standard QR payload strings. Generate locally with ZXing 3.5.4 at error co
 
 ## Privacy and legal
 
-The app has no account, ads, analytics, tracking, or backend. QR creation is offline. Google Play services may download and run the scanner module. Add `PRIVACY.md`, `THIRD_PARTY_NOTICES.md`, a public privacy HTML page, source link, version, and the same Buy Me a Coffee destination used by ScanIt: `https://www.buymeacoffee.com/majkey`.
+The app has no account, ads, analytics, tracking, or backend. Scanning and QR creation are offline. Camera frames stay on device and are not saved. Add `PRIVACY.md`, `THIRD_PARTY_NOTICES.md`, a public privacy HTML page, source link, version, and the same Buy Me a Coffee destination used by ScanIt: `https://www.buymeacoffee.com/majkey`.
 
 ## Build and release
 
 - Package: `com.majkeylab.qrscannercreator`
-- `minSdk = 29`, `targetSdk = 36`, `compileSdk = 36`
+- `minSdk = 29`, `targetSdk = 37`, `compileSdk = 37`
 - Kotlin Compose, Java 17, Gradle wrapper
 - JUnit pure-logic tests, Android lint, debug and release builds
 - GitHub Actions badge, signed tag release workflow, APK and SHA-256 asset

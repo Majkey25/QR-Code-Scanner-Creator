@@ -6,14 +6,14 @@
 
 **Architecture:** One Compose activity owns launchers and app navigation. Pure Kotlin payload/style logic feeds a ZXing bitmap renderer; one Android helper maps typed ML Kit results to explicit safe intents.
 
-**Tech Stack:** Kotlin 2.4.10, Compose Material 3, AGP 9.3.1, Google Code Scanner 16.1.0, ZXing core 3.5.4, JUnit 4.
+**Tech Stack:** Kotlin 2.4.10, Compose Material 3, AGP 9.3.1, CameraX 1.6.1, ZXing core 3.5.4, JUnit 4.
 
 **Spec:** `docs/superpowers/specs/2026-08-24-android-app-design.md`
 
 ## Global constraints
 
-- Package `com.majkeylab.qrscannercreator`; `minSdk = 29`, `targetSdk = 36`, `compileSdk = 36`.
-- No account, ads, analytics, backend, storage permission, or app-owned camera permission.
+- Package `com.majkeylab.qrscannercreator`; `minSdk = 29`, `targetSdk = 37`, `compileSdk = 37`.
+- No account, ads, analytics, backend, or storage permission; camera permission is requested only inside the scanner.
 - External content can open only typed Android actions; raw URI schemes never execute.
 - UI uses English defaults plus Czech translations.
 

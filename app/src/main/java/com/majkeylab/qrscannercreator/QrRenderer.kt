@@ -14,16 +14,47 @@ import java.io.FileOutputStream
 data class QrImage(
     val size: Int,
     val pixels: IntArray,
+    val background: Int,
 ) {
     fun toBitmap(): Bitmap =
         Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888).also { bitmap ->
             bitmap.setPixels(pixels, 0, size, 0, 0, size, size)
         }
+
+    fun withLogo(logo: Bitmap): QrImage {
+        val output = pixels.copyOf()
+        val logoSize = (size * 0.18f).toInt()
+        val clearSize = (size * 0.23f).toInt()
+        val clearStart = (size - clearSize) / 2
+        for (y in 0 until clearSize) {
+            for (x in 0 until clearSize) {
+                if (ModuleShape.ROUNDED.contains(x, y, clearSize)) {
+                    output[(clearStart + y) * size + clearStart + x] = background
+                }
+            }
+        }
+
+        val scaled = Bitmap.createScaledBitmap(logo, logoSize, logoSize, true)
+        val logoPixels = IntArray(logoSize * logoSize)
+        scaled.getPixels(logoPixels, 0, logoSize, 0, 0, logoSize, logoSize)
+        val logoStart = (size - logoSize) / 2
+        logoPixels.forEachIndexed { index, color ->
+            if (color ushr 24 >= 128) {
+                val x = index % logoSize
+                val y = index / logoSize
+                output[(logoStart + y) * size + logoStart + x] = color or 0xFF000000.toInt()
+            }
+        }
+        return copy(pixels = output)
+    }
 }
 
 object QrRenderer {
     fun renderPixels(payload: String, style: ParsedQrStyle, size: Int = 1024): QrImage {
         require(payload.isNotBlank()) { "QR content is required" }
+        require(payload.toByteArray(Charsets.UTF_8).size <= MAX_QR_CONTENT_BYTES) {
+            "QR content is too long"
+        }
         require(size in 256..2048) { "QR image size must be between 256 and 2048 pixels" }
 
         val matrix =
@@ -52,7 +83,7 @@ object QrRenderer {
                 )
             }
         }
-        return QrImage(size, pixels)
+        return QrImage(size, pixels, style.background)
     }
 
     fun share(context: Context, image: QrImage) {
@@ -76,6 +107,7 @@ object QrRenderer {
 }
 
 private const val QUIET_ZONE_MODULES = 4
+private const val MAX_QR_CONTENT_BYTES = 1200
 
 private fun isFinderModule(x: Int, y: Int, width: Int): Boolean =
     (x < 7 && y < 7) || (x >= width - 7 && y < 7) || (x < 7 && y >= width - 7)
