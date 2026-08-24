@@ -28,6 +28,7 @@ internal fun PremiumPanel() {
 
     Surface(
         color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.55f),
+        contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
         shape = RoundedCornerShape(22.dp),
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.22f)),
     ) {
@@ -49,7 +50,7 @@ internal fun PremiumPanel() {
             if (!state.premium) {
                 when {
                     state.pending -> Text(stringResource(R.string.premium_pending))
-                    state.error -> Text(
+                    state.error && state.purchaseAvailable -> Text(
                         stringResource(R.string.premium_error),
                         color = MaterialTheme.colorScheme.error,
                     )

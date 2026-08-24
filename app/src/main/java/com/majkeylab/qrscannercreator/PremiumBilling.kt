@@ -74,7 +74,7 @@ internal object PremiumController : PurchasesUpdatedListener {
         when (result.responseCode) {
             BillingClient.BillingResponseCode.OK -> processPurchases(purchases.orEmpty())
             BillingClient.BillingResponseCode.USER_CANCELED -> Unit
-            else -> updateState { it.copy(checking = false, error = true) }
+            else -> markBillingUnavailable()
         }
     }
 
@@ -89,13 +89,13 @@ internal object PremiumController : PurchasesUpdatedListener {
                         queryProduct(client)
                         queryPurchases(client)
                     } else {
-                        updateState { it.copy(checking = false, error = true) }
+                        markBillingUnavailable()
                     }
                 }
 
                 override fun onBillingServiceDisconnected() {
                     connectionStarted = false
-                    updateState { it.copy(checking = false, error = true) }
+                    markBillingUnavailable()
                 }
             },
         )
@@ -138,7 +138,7 @@ internal object PremiumController : PurchasesUpdatedListener {
             if (result.responseCode == BillingClient.BillingResponseCode.OK) {
                 processPurchases(purchases)
             } else {
-                updateState { it.copy(checking = false, error = true) }
+                markBillingUnavailable()
             }
         }
     }
@@ -187,5 +187,15 @@ internal object PremiumController : PurchasesUpdatedListener {
 
     private fun updateState(update: (PremiumState) -> PremiumState) {
         mainHandler.post { state = update(state) }
+    }
+
+    private fun markBillingUnavailable() {
+        updateState {
+            it.copy(
+                entitlementVerified = it.entitlementVerified || BuildConfig.DEBUG,
+                checking = false,
+                error = true,
+            )
+        }
     }
 }

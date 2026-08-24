@@ -1,10 +1,20 @@
 package com.majkeylab.qrscannercreator
 
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class MonetizationPolicyTest {
+    @Test
+    fun debugUsesProductionAppIdWithGoogleTestAdUnits() {
+        val ads = MonetizationConfig.adsForDebuggable(debuggable = true)
+
+        assertEquals("ca-app-pub-6991329209066655~5561017627", ads.appId)
+        assertEquals("ca-app-pub-3940256099942544/9214589741", ads.bannerAdUnitId)
+        assertEquals("ca-app-pub-3940256099942544/1033173712", ads.interstitialAdUnitId)
+    }
+
     @Test
     fun interstitialRequiresFifthScanAndFiveMinuteCooldown() {
         assertFalse(isInterstitialDue(4, 300_000, null))

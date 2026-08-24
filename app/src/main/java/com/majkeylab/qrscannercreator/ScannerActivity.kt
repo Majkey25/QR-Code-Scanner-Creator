@@ -253,6 +253,7 @@ private fun ScannerScreen(
                 modifier = Modifier.padding(24.dp).widthIn(max = 480.dp).fillMaxWidth(),
                 shape = RoundedCornerShape(32.dp),
                 color = MaterialTheme.colorScheme.surface.copy(alpha = 0.96f),
+                contentColor = MaterialTheme.colorScheme.onSurface,
                 shadowElevation = 8.dp,
             ) {
                 Column(

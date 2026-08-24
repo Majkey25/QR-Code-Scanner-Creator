@@ -85,7 +85,6 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        PremiumController.refresh(this)
         setContent {
             QrApp(
                 scanResult = scanResult,

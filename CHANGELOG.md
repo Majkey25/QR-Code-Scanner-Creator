@@ -1,5 +1,19 @@
 # Changelog
 
+## 1.1.0 - 2026-08-24
+
+### Added
+
+- QR scanning from images selected with Android Photo Picker.
+- Unobtrusive adaptive banner ads and scan-completion interstitials capped at one every five minutes.
+- One-time QR Premium purchase and restore through the user's Google Play account.
+- Google UMP consent and in-app ad privacy controls.
+
+### Fixed
+
+- Made the Create screen's content-type label readable in dark mode.
+- Added a monochrome launcher icon for themed Android icons.
+
 ## 1.0.1 - 2026-08-24
 
 ### Changed

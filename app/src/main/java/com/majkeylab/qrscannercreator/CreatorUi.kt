@@ -169,6 +169,7 @@ fun CreatorScreen(
             Surface(
                 shape = RoundedCornerShape(26.dp),
                 color = MaterialTheme.colorScheme.surface.copy(alpha = 0.96f),
+                contentColor = MaterialTheme.colorScheme.onSurface,
                 border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.55f)),
                 shadowElevation = 2.dp,
             ) {
@@ -179,7 +180,6 @@ fun CreatorScreen(
                     Text(
                         stringResource(R.string.content_type),
                         style = MaterialTheme.typography.labelLarge,
-                        color = MaterialTheme.colorScheme.onSurface,
                     )
                     LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         items(CreatorType.entries.size) { index ->
@@ -259,6 +259,7 @@ fun CreatorScreen(
                 Surface(
                     shape = RoundedCornerShape(28.dp),
                     color = MaterialTheme.colorScheme.surface.copy(alpha = 0.96f),
+                    contentColor = MaterialTheme.colorScheme.onSurface,
                     border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.55f)),
                     shadowElevation = 2.dp,
                 ) {
@@ -529,6 +530,7 @@ private fun AppearanceFields(
     Surface(
         shape = RoundedCornerShape(24.dp),
         color = MaterialTheme.colorScheme.surface.copy(alpha = 0.96f),
+        contentColor = MaterialTheme.colorScheme.onSurface,
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)),
     ) {
         Column(

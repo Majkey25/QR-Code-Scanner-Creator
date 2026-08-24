@@ -59,7 +59,7 @@ internal object MonetizationConfig {
     fun adsForDebuggable(debuggable: Boolean): AdIds =
         if (debuggable) {
             AdIds(
-                appId = "ca-app-pub-3940256099942544~3347511713",
+                appId = "ca-app-pub-6991329209066655~5561017627",
                 bannerAdUnitId = "ca-app-pub-3940256099942544/9214589741",
                 interstitialAdUnitId = "ca-app-pub-3940256099942544/1033173712",
             )

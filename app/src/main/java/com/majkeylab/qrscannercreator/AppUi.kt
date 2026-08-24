@@ -340,6 +340,7 @@ private fun ResultPanel(
     Surface(
         shape = RoundedCornerShape(26.dp),
         color = MaterialTheme.colorScheme.surface.copy(alpha = 0.96f),
+        contentColor = MaterialTheme.colorScheme.onSurface,
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.6f)),
         shadowElevation = 2.dp,
     ) {

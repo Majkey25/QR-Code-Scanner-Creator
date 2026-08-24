@@ -1,7 +1,8 @@
-Skenujte a vytvářejte QR kódy bez reklam, účtů, analytiky a sledování.
+Skenujte QR kódy fotoaparátem nebo z obrázku v galerii. Vlastní kódy pak vytvořte a sdílejte.
 
 Skener
 • CameraX a ZXing zpracují QR kód přímo v zařízení.
+• Vybere obrázek s QR kódem přes Android Photo Picker.
 • Otevře bezpečné webové odkazy.
 • Připojí nebo uloží Wi-Fi po potvrzení v Androidu.
 • Přidá kontakt nebo událost do kalendáře.
@@ -19,5 +20,11 @@ Soukromí
 • Obraz z fotoaparátu zůstává v zařízení a neukládá se.
 • Bez plošného přístupu ke kontaktům, fotkám a úložišti.
 • Bez historie QR kódů a cloudového backendu.
+
+Zdarma a Premium
+• Bezplatná verze obsahuje střídmé bannerové reklamy.
+• Celoobrazovková reklama se zobrazí jen po dokončeném skenu a nejvýše jednou za pět minut.
+• Jednorázové QR Premium odstraní všechny reklamy přes váš účet Google Play.
+• Kde je to vyžadováno, aplikace nabízí souhlas Googlu a nastavení soukromí reklam.
 
 Vyžaduje Android 10 nebo novější.

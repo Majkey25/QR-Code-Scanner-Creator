@@ -13,8 +13,8 @@ android {
         applicationId = "com.majkeylab.qrscannercreator"
         minSdk = 29
         targetSdk = 37
-        versionCode = 2
-        versionName = "1.0.1"
+        versionCode = 3
+        versionName = "1.1.0"
     }
 
     signingConfigs {
@@ -30,7 +30,7 @@ android {
 
     buildTypes {
         debug {
-            manifestPlaceholders["admobAppId"] = "ca-app-pub-3940256099942544~3347511713"
+            manifestPlaceholders["admobAppId"] = "ca-app-pub-6991329209066655~5561017627"
         }
         release {
             manifestPlaceholders["admobAppId"] = "ca-app-pub-6991329209066655~5561017627"

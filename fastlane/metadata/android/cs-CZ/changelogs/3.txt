@@ -1,0 +1,1 @@
+Skenování QR kódů z obrázků v galerii. Přidány střídmé reklamy, nastavení souhlasu Googlu a jednorázové QR Premium bez reklam. Opraven kontrast typu obsahu v tmavém režimu.
