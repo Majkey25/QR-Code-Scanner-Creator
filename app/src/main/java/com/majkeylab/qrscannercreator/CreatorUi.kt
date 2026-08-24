@@ -176,7 +176,11 @@ fun CreatorScreen(
                     modifier = Modifier.padding(20.dp),
                     verticalArrangement = Arrangement.spacedBy(16.dp),
                 ) {
-                    Text(stringResource(R.string.content_type), style = MaterialTheme.typography.labelLarge)
+                    Text(
+                        stringResource(R.string.content_type),
+                        style = MaterialTheme.typography.labelLarge,
+                        color = MaterialTheme.colorScheme.onSurface,
+                    )
                     LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         items(CreatorType.entries.size) { index ->
                             val option = CreatorType.entries[index]
@@ -192,6 +196,7 @@ fun CreatorScreen(
                 }
             }
         }
+        item { MonetizationBanner() }
         item {
             AppearanceFields(
                 form = form,
