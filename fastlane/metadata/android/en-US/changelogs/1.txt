@@ -1,0 +1,1 @@
+Initial release: local QR scanning, typed Android actions, styled QR creation, logo support, and private PNG sharing.
