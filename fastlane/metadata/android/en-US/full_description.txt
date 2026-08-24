@@ -1,0 +1,23 @@
+Scan and create QR codes without ads, accounts, analytics, or tracking.
+
+Scanner
+• CameraX and ZXing process QR codes locally.
+• Open safe web links.
+• Connect or save Wi-Fi through Android confirmation.
+• Add contacts and calendar events.
+• Open the dialer, Messages, email, and Maps.
+• Copy or share any other content.
+
+Creator
+• Text, website, Wi-Fi, contact, email, phone, SMS, location, and event QR codes.
+• Custom module, corner, and background colors.
+• Square, rounded, or dot styles.
+• Optional logo from Android Photo Picker.
+• Share a PNG through the Android share sheet.
+
+Privacy
+• Camera frames stay on your device and are not saved.
+• No broad contacts, photo, or storage access.
+• No QR history or cloud backend.
+
+Requires Android 10 or newer.

@@ -1,0 +1,1 @@
+První vydání: místní skenování QR kódů, systémové akce Androidu, vlastní vzhled, logo a soukromé sdílení PNG.
