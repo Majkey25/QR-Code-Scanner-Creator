@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.1.1 - 2026-08-25
+
+- Fixed a release-only startup crash caused by WorkManager database initialization after R8 optimization.
+
 ## 1.1.0 - 2026-08-24
 
 ### Added
