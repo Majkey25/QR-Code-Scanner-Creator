@@ -1,0 +1,1 @@
+Improved navigation readability and moved banner ads out of the main workflow.

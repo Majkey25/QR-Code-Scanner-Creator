@@ -192,7 +192,6 @@ fun CreatorScreen(
                 }
             }
         }
-        item { MonetizationBanner() }
         item {
             AppearanceFields(
                 form = form,
@@ -295,6 +294,7 @@ fun CreatorScreen(
                 }
             }
         }
+        item { MonetizationBanner() }
     }
 }
 

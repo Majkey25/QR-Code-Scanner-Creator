@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.1.4 - 2026-08-25
+
+- Made the floating navigation controls fully opaque for consistent readability.
+- Moved banner ads below completed content so they no longer interrupt Scan or Create workflows.
+
 ## 1.1.3 - 2026-08-25
 
 - Removed the reserved app-bar regions so content scrolls naturally beneath the translucent controls.
