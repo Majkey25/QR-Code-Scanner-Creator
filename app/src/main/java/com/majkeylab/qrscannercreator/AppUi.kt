@@ -38,7 +38,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Shapes
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -104,115 +103,112 @@ fun QrApp(
                 Modifier.fillMaxSize()
                     .background(Brush.verticalGradient(tab.backgroundColors())),
         ) {
-            Scaffold(
-                containerColor = Color.Transparent,
-                topBar = {
-                    CenterAlignedTopAppBar(
-                        colors =
-                            TopAppBarDefaults.topAppBarColors(
-                                containerColor = Color.Transparent,
-                                scrolledContainerColor = Color.Transparent,
+            val contentPadding = PaddingValues(top = 112.dp, bottom = 112.dp)
+            when (tab) {
+                AppTab.SCAN ->
+                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.TopCenter) {
+                        ScanScreen(
+                            result = scanResult,
+                            scanError = scanError,
+                            actionNotice = actionNotice,
+                            actionError = actionError,
+                            onScan = onScan,
+                            onPerformAction = onPerformAction,
+                            onCopy = onCopy,
+                            onShare = onShareText,
+                            contentPadding = contentPadding,
+                            modifier = Modifier.fillMaxHeight().widthIn(max = 680.dp).fillMaxWidth(),
+                        )
+                    }
+                AppTab.CREATE ->
+                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.TopCenter) {
+                        CreatorScreen(
+                            pickedPhone = pickedPhone,
+                            pickedLogo = pickedLogo,
+                            onPickPhone = onPickPhone,
+                            onPickLogo = onPickLogo,
+                            onClearLogo = onClearLogo,
+                            onShareImage = onShareImage,
+                            contentPadding = contentPadding,
+                            modifier = Modifier.fillMaxHeight().widthIn(max = 680.dp).fillMaxWidth(),
+                        )
+                    }
+            }
+
+            CenterAlignedTopAppBar(
+                modifier = Modifier.align(Alignment.TopCenter),
+                colors =
+                    TopAppBarDefaults.topAppBarColors(
+                        containerColor = Color.Transparent,
+                        scrolledContainerColor = Color.Transparent,
+                    ),
+                title = {
+                    Surface(
+                        color = Color.Transparent,
+                        shape = RoundedCornerShape(20.dp),
+                        border =
+                            BorderStroke(
+                                1.dp,
+                                MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.45f),
                             ),
-                        title = {
-                            Surface(
-                                color = Color.Transparent,
-                                shape = RoundedCornerShape(20.dp),
-                                border =
-                                    BorderStroke(
-                                        1.dp,
-                                        MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.45f),
-                                    ),
-                            ) {
-                                Text(
-                                    stringResource(tab.label),
-                                    modifier =
-                                        Modifier.background(glassBrush(MaterialTheme.colorScheme.primary))
-                                            .padding(horizontal = 18.dp, vertical = 8.dp),
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis,
-                                    style = MaterialTheme.typography.titleMedium,
-                                    fontWeight = FontWeight.Bold,
-                                )
-                            }
-                        },
-                        actions = {
-                            Box {
-                                Surface(
-                                    shape = CircleShape,
-                                    color = Color.Transparent,
-                                    border =
-                                        BorderStroke(
-                                            1.dp,
-                                            MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.45f),
-                                        ),
-                                ) {
-                                    Box(modifier = Modifier.background(glassBrush())) {
-                                        IconButton(onClick = { menuExpanded = true }) {
-                                            Icon(
-                                                painterResource(R.drawable.ic_more_vert),
-                                                contentDescription = stringResource(R.string.more_options),
-                                            )
-                                        }
-                                    }
-                                }
-                                DropdownMenu(
-                                    expanded = menuExpanded,
-                                    onDismissRequest = { menuExpanded = false },
-                                ) {
-                                    DropdownMenuItem(
-                                        text = { Text(stringResource(R.string.about)) },
-                                        onClick = {
-                                            menuExpanded = false
-                                            aboutVisible = true
-                                        },
+                    ) {
+                        Text(
+                            stringResource(tab.label),
+                            modifier =
+                                Modifier.background(glassBrush(MaterialTheme.colorScheme.primary))
+                                    .padding(horizontal = 18.dp, vertical = 8.dp),
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold,
+                        )
+                    }
+                },
+                actions = {
+                    Box {
+                        Surface(
+                            shape = CircleShape,
+                            color = Color.Transparent,
+                            border =
+                                BorderStroke(
+                                    1.dp,
+                                    MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.45f),
+                                ),
+                        ) {
+                            Box(modifier = Modifier.background(glassBrush())) {
+                                IconButton(onClick = { menuExpanded = true }) {
+                                    Icon(
+                                        painterResource(R.drawable.ic_more_vert),
+                                        contentDescription = stringResource(R.string.more_options),
                                     )
                                 }
                             }
-                        },
-                    )
-                },
-                bottomBar = {
-                    Box(
-                        modifier =
-                            Modifier.fillMaxWidth()
-                                .navigationBarsPadding()
-                                .padding(horizontal = 24.dp, vertical = 10.dp),
-                        contentAlignment = Alignment.Center,
-                    ) {
-                        GlassTabBar(selected = tab, onSelected = { tab = it })
+                        }
+                        DropdownMenu(
+                            expanded = menuExpanded,
+                            onDismissRequest = { menuExpanded = false },
+                        ) {
+                            DropdownMenuItem(
+                                text = { Text(stringResource(R.string.about)) },
+                                onClick = {
+                                    menuExpanded = false
+                                    aboutVisible = true
+                                },
+                            )
+                        }
                     }
                 },
-            ) { innerPadding ->
-                when (tab) {
-                    AppTab.SCAN ->
-                        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.TopCenter) {
-                            ScanScreen(
-                                result = scanResult,
-                                scanError = scanError,
-                                actionNotice = actionNotice,
-                                actionError = actionError,
-                                onScan = onScan,
-                                onPerformAction = onPerformAction,
-                                onCopy = onCopy,
-                                onShare = onShareText,
-                                contentPadding = innerPadding,
-                                modifier = Modifier.fillMaxHeight().widthIn(max = 680.dp).fillMaxWidth(),
-                            )
-                        }
-                    AppTab.CREATE ->
-                        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.TopCenter) {
-                            CreatorScreen(
-                                pickedPhone = pickedPhone,
-                                pickedLogo = pickedLogo,
-                                onPickPhone = onPickPhone,
-                                onPickLogo = onPickLogo,
-                                onClearLogo = onClearLogo,
-                                onShareImage = onShareImage,
-                                contentPadding = innerPadding,
-                                modifier = Modifier.fillMaxHeight().widthIn(max = 680.dp).fillMaxWidth(),
-                            )
-                        }
-                }
+            )
+
+            Box(
+                modifier =
+                    Modifier.align(Alignment.BottomCenter)
+                        .fillMaxWidth()
+                        .navigationBarsPadding()
+                        .padding(horizontal = 24.dp, vertical = 10.dp),
+                contentAlignment = Alignment.Center,
+            ) {
+                GlassTabBar(selected = tab, onSelected = { tab = it })
             }
         }
 
@@ -311,17 +307,13 @@ private fun ScanScreen(
     modifier: Modifier,
 ) {
     LazyColumn(
-        modifier =
-            modifier.padding(
-                top = contentPadding.calculateTopPadding(),
-                bottom = contentPadding.calculateBottomPadding(),
-            ),
+        modifier = modifier,
         contentPadding =
             PaddingValues(
                 start = 24.dp,
-                top = 28.dp,
+                top = contentPadding.calculateTopPadding() + 28.dp,
                 end = 24.dp,
-                bottom = 28.dp,
+                bottom = contentPadding.calculateBottomPadding() + 28.dp,
             ),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
