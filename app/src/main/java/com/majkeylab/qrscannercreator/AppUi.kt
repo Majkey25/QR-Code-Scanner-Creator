@@ -149,7 +149,7 @@ fun QrApp(
                         border =
                             BorderStroke(
                                 1.dp,
-                                MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.45f),
+                                MaterialTheme.colorScheme.outlineVariant,
                             ),
                     ) {
                         Text(
@@ -172,7 +172,7 @@ fun QrApp(
                             border =
                                 BorderStroke(
                                     1.dp,
-                                    MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.45f),
+                                    MaterialTheme.colorScheme.outlineVariant,
                                 ),
                         ) {
                             Box(modifier = Modifier.background(glassBrush())) {
@@ -236,13 +236,13 @@ private fun GlassTabBar(selected: AppTab, onSelected: (AppTab) -> Unit) {
                         },
                 color =
                     if (active) {
-                        MaterialTheme.colorScheme.primary.copy(alpha = 0.22f)
+                        MaterialTheme.colorScheme.primaryContainer
                     } else {
-                        MaterialTheme.colorScheme.surface.copy(alpha = 0.48f)
+                        MaterialTheme.colorScheme.surface
                     },
                 contentColor =
                     if (active) {
-                        MaterialTheme.colorScheme.primary
+                        MaterialTheme.colorScheme.onPrimaryContainer
                     } else {
                         MaterialTheme.colorScheme.onSurfaceVariant
                     },
@@ -250,7 +250,7 @@ private fun GlassTabBar(selected: AppTab, onSelected: (AppTab) -> Unit) {
                 border =
                     BorderStroke(
                         1.dp,
-                        accent.copy(alpha = if (active) 0.48f else 0.36f),
+                        accent,
                     ),
             ) {
                 Column(
@@ -279,8 +279,8 @@ private fun GlassTabBar(selected: AppTab, onSelected: (AppTab) -> Unit) {
 private fun glassBrush(accent: Color = MaterialTheme.colorScheme.surfaceVariant): Brush =
     Brush.verticalGradient(
         listOf(
-            accent.copy(alpha = 0.54f),
-            MaterialTheme.colorScheme.surface.copy(alpha = 0.32f),
+            accent,
+            MaterialTheme.colorScheme.surface,
         ),
     )
 
@@ -322,7 +322,6 @@ private fun ScanScreen(
                 onScan = onScan,
             )
         }
-        item { MonetizationBanner() }
         scanError?.let { error -> item { StatusText(error, isError = true) } }
         actionNotice?.let { notice -> item { StatusText(notice, isError = false) } }
         actionError?.let { error -> item { StatusText(error, isError = true) } }
@@ -335,6 +334,7 @@ private fun ScanScreen(
                     onShare = { onShare(scanned.raw) },
                 )
             }
+            item { MonetizationBanner() }
         }
     }
 }
