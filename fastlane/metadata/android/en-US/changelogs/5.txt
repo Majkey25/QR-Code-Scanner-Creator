@@ -1,0 +1,1 @@
+Refined Scan and Create navigation with clearer translucent controls.
