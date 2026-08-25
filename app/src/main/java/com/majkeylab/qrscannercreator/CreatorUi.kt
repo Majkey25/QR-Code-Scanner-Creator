@@ -148,17 +148,13 @@ fun CreatorScreen(
     }
 
     LazyColumn(
-        modifier =
-            modifier.padding(
-                top = contentPadding.calculateTopPadding(),
-                bottom = contentPadding.calculateBottomPadding(),
-            ),
+        modifier = modifier,
         contentPadding =
             PaddingValues(
                 start = 24.dp,
-                top = 28.dp,
+                top = contentPadding.calculateTopPadding() + 28.dp,
                 end = 24.dp,
-                bottom = 28.dp,
+                bottom = contentPadding.calculateBottomPadding() + 28.dp,
             ),
         verticalArrangement = Arrangement.spacedBy(18.dp),
     ) {

@@ -1,0 +1,1 @@
+Obsah nyní přirozeně prochází pod průhlednými horními a spodními ovládacími prvky.

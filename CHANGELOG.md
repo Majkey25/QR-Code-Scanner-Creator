@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.1.3 - 2026-08-25
+
+- Removed the reserved app-bar regions so content scrolls naturally beneath the translucent controls.
+
 ## 1.1.2 - 2026-08-25
 
 - Replaced the shared bottom navigation panel with two translucent Scan and Create controls.
