@@ -1,0 +1,1 @@
+Vylepšena navigace Scan a Create s přehlednějšími průhlednými ovládacími prvky.

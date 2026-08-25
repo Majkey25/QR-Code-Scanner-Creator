@@ -37,9 +37,6 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Shapes
@@ -65,6 +62,10 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.selected
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -113,25 +114,45 @@ fun QrApp(
                                 scrolledContainerColor = Color.Transparent,
                             ),
                         title = {
-                            Text(
-                                stringResource(tab.label),
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis,
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.Bold,
-                            )
+                            Surface(
+                                color = Color.Transparent,
+                                shape = RoundedCornerShape(20.dp),
+                                border =
+                                    BorderStroke(
+                                        1.dp,
+                                        MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.45f),
+                                    ),
+                            ) {
+                                Text(
+                                    stringResource(tab.label),
+                                    modifier =
+                                        Modifier.background(glassBrush(MaterialTheme.colorScheme.primary))
+                                            .padding(horizontal = 18.dp, vertical = 8.dp),
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis,
+                                    style = MaterialTheme.typography.titleMedium,
+                                    fontWeight = FontWeight.Bold,
+                                )
+                            }
                         },
                         actions = {
                             Box {
                                 Surface(
                                     shape = CircleShape,
-                                    color = MaterialTheme.colorScheme.surface.copy(alpha = 0.72f),
+                                    color = Color.Transparent,
+                                    border =
+                                        BorderStroke(
+                                            1.dp,
+                                            MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.45f),
+                                        ),
                                 ) {
-                                    IconButton(onClick = { menuExpanded = true }) {
-                                        Icon(
-                                            painterResource(R.drawable.ic_more_vert),
-                                            contentDescription = stringResource(R.string.more_options),
-                                        )
+                                    Box(modifier = Modifier.background(glassBrush())) {
+                                        IconButton(onClick = { menuExpanded = true }) {
+                                            Icon(
+                                                painterResource(R.drawable.ic_more_vert),
+                                                contentDescription = stringResource(R.string.more_options),
+                                            )
+                                        }
                                     }
                                 }
                                 DropdownMenu(
@@ -158,33 +179,7 @@ fun QrApp(
                                 .padding(horizontal = 24.dp, vertical = 10.dp),
                         contentAlignment = Alignment.Center,
                     ) {
-                        Surface(
-                            modifier = Modifier.widthIn(max = 280.dp).fillMaxWidth(),
-                            color = MaterialTheme.colorScheme.surface.copy(alpha = 0.96f),
-                            shape = RoundedCornerShape(32.dp),
-                            shadowElevation = 2.dp,
-                        ) {
-                            NavigationBar(containerColor = Color.Transparent, tonalElevation = 0.dp) {
-                                AppTab.entries.forEach { option ->
-                                    NavigationBarItem(
-                                        selected = tab == option,
-                                        onClick = { tab = option },
-                                        colors =
-                                            NavigationBarItemDefaults.colors(
-                                                indicatorColor = MaterialTheme.colorScheme.primaryContainer,
-                                            ),
-                                        icon = {
-                                            Icon(
-                                                painterResource(option.icon),
-                                                contentDescription = null,
-                                                modifier = Modifier.size(22.dp),
-                                            )
-                                        },
-                                        label = { Text(stringResource(option.label)) },
-                                    )
-                                }
-                            }
-                        }
+                        GlassTabBar(selected = tab, onSelected = { tab = it })
                     }
                 },
             ) { innerPadding ->
@@ -224,6 +219,74 @@ fun QrApp(
         if (aboutVisible) AboutDialog(onDismiss = { aboutVisible = false })
     }
 }
+
+@Composable
+private fun GlassTabBar(selected: AppTab, onSelected: (AppTab) -> Unit) {
+    Row(
+        modifier = Modifier.widthIn(max = 300.dp).fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        AppTab.entries.forEach { option ->
+            val active = selected == option
+            val accent = if (active) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant
+            Surface(
+                onClick = { onSelected(option) },
+                modifier =
+                    Modifier.weight(1f)
+                        .height(72.dp)
+                        .semantics {
+                            role = Role.Tab
+                            this.selected = active
+                        },
+                color =
+                    if (active) {
+                        MaterialTheme.colorScheme.primary.copy(alpha = 0.22f)
+                    } else {
+                        MaterialTheme.colorScheme.surface.copy(alpha = 0.48f)
+                    },
+                contentColor =
+                    if (active) {
+                        MaterialTheme.colorScheme.primary
+                    } else {
+                        MaterialTheme.colorScheme.onSurfaceVariant
+                    },
+                shape = RoundedCornerShape(24.dp),
+                border =
+                    BorderStroke(
+                        1.dp,
+                        accent.copy(alpha = if (active) 0.48f else 0.36f),
+                    ),
+            ) {
+                Column(
+                    modifier = Modifier.fillMaxSize(),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center,
+                ) {
+                    Icon(
+                        painterResource(option.icon),
+                        contentDescription = null,
+                        modifier = Modifier.size(22.dp),
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        stringResource(option.label),
+                        style = MaterialTheme.typography.labelLarge,
+                        fontWeight = if (active) FontWeight.Bold else FontWeight.Medium,
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun glassBrush(accent: Color = MaterialTheme.colorScheme.surfaceVariant): Brush =
+    Brush.verticalGradient(
+        listOf(
+            accent.copy(alpha = 0.54f),
+            MaterialTheme.colorScheme.surface.copy(alpha = 0.32f),
+        ),
+    )
 
 @Composable
 private fun AppTab.backgroundColors(): List<Color> {

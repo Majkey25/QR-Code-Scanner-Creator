@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.1.2 - 2026-08-25
+
+- Replaced the shared bottom navigation panel with two translucent Scan and Create controls.
+- Improved the active-tab contrast and added a matching glass treatment to the top bar.
+
 ## 1.1.1 - 2026-08-25
 
 - Fixed a release-only startup crash caused by WorkManager database initialization after R8 optimization.
