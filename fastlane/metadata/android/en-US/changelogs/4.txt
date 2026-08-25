@@ -1,0 +1,1 @@
+Fixed a startup crash in optimized release builds on Android 10.
