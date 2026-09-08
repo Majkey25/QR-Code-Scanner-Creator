@@ -68,6 +68,9 @@ internal data class PremiumState(
 ) {
     val purchaseAvailable: Boolean
         get() = monthlyAvailable || lifetimeAvailable
+
+    val canStartPurchase: Boolean
+        get() = entitlementVerified && !premium && !checking && !pending
 }
 
 internal fun PremiumState.withPurchaseQueryFailure(): PremiumState =

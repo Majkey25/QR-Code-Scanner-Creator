@@ -71,7 +71,7 @@ internal fun PremiumPanel() {
                 }
                 OutlinedButton(
                     onClick = { PremiumController.launchPurchase(activity, PremiumPlan.Monthly) },
-                    enabled = state.monthlyAvailable && !state.pending && !state.checking,
+                    enabled = state.monthlyAvailable && state.canStartPurchase,
                     modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp),
                 ) {
                     Text(
@@ -82,7 +82,7 @@ internal fun PremiumPanel() {
                 }
                 Button(
                     onClick = { PremiumController.launchPurchase(activity, PremiumPlan.Lifetime) },
-                    enabled = state.lifetimeAvailable && !state.pending && !state.checking,
+                    enabled = state.lifetimeAvailable && state.canStartPurchase,
                     modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp),
                 ) {
                     Text(

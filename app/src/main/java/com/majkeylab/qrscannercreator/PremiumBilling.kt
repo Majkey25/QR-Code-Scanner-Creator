@@ -57,7 +57,7 @@ internal object PremiumController : PurchasesUpdatedListener {
     fun launchPurchase(activity: Activity, plan: PremiumPlan) {
         val client = billingClient
         val offer = offers[plan]
-        if (client == null || !client.isReady || offer == null) {
+        if (!state.canStartPurchase || client == null || !client.isReady || offer == null) {
             updateState { it.copy(error = true) }
             return
         }

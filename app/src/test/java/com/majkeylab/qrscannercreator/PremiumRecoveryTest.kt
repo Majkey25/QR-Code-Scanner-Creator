@@ -11,6 +11,16 @@ class PremiumRecoveryTest {
     private val lifetime = PremiumPurchase(setOf(PREMIUM_PRODUCT_ID), PremiumPurchaseState.Purchased)
 
     @Test
+    fun purchaseRequiresVerifiedFreeOwnership() {
+        val free = PremiumState(entitlementVerified = true, checking = false)
+        assertTrue(free.canStartPurchase)
+        assertFalse(free.copy(entitlementVerified = false).canStartPurchase)
+        assertFalse(free.copy(premium = true).canStartPurchase)
+        assertFalse(free.copy(pending = true).canStartPurchase)
+        assertFalse(free.copy(checking = true).canStartPurchase)
+    }
+
+    @Test
     fun failedLifetimeQueryStillRestoresMonthly() {
         val queries = PurchaseQueries<PremiumPurchase> { hasPremiumEntitlement(listOf(it)) }
         val requested = mutableListOf<PremiumPlan>()
