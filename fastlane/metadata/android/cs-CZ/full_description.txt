@@ -3,7 +3,7 @@ Skenujte QR kódy fotoaparátem nebo z obrázku v galerii. Vlastní kódy pak vy
 Skener
 • CameraX a ZXing zpracují QR kód přímo v zařízení.
 • Vybere obrázek s QR kódem přes Android Photo Picker.
-• Otevře bezpečné webové odkazy.
+• Otevře vybraný webový odkaz v prohlížeči. Rozpoznání QR kódu neověřuje bezpečnost cílové stránky.
 • Připojí nebo uloží Wi-Fi po potvrzení v Androidu.
 • Přidá kontakt nebo událost do kalendáře.
 • Otevře telefon, Zprávy, e-mail a Mapy.
