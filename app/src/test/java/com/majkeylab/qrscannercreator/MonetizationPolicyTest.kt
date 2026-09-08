@@ -65,4 +65,24 @@ class MonetizationPolicyTest {
         assertFalse(entitlement.premium)
         assertTrue(entitlement.pending)
     }
+
+    @Test
+    fun changedPrivacyChoicesInvalidateAdsEvenWhenRequestsStayAllowed() {
+        val gate = ConsentGate()
+        gate.update(canRequestAds = true, privacyOptionsRequired = true)
+        val previous = gate.revision
+        gate.update(canRequestAds = true, privacyOptionsRequired = true, invalidateAds = true)
+        assertTrue(gate.canRequestAds)
+        assertEquals(previous + 1, gate.revision)
+    }
+
+    @Test
+    fun consentRevocationInvalidatesInFlightLoads() {
+        val gate = ConsentGate()
+        gate.update(canRequestAds = true, privacyOptionsRequired = true)
+        val previous = gate.revision
+        gate.update(canRequestAds = false, privacyOptionsRequired = true)
+        assertFalse(gate.canRequestAds)
+        assertEquals(previous + 1, gate.revision)
+    }
 }

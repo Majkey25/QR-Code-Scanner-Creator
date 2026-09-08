@@ -104,11 +104,16 @@
     <string name="premium_lifetime">Premium lifetime</string>
     <string name="premium_lifetime_price">Lifetime · %1$s once</string>
     <string name="premium_restore">Restore purchase</string>
+    <string name="premium_terms">Premium is optional. Monthly Premium renews automatically each month at the displayed price until canceled in Google Play. Lifetime Premium is a one-time payment. Scanning and QR creation remain free with ads.</string>
+    <string name="premium_manage">Manage or cancel subscription</string>
+    <string name="premium_manage_error">Could not open subscription management. Open Google Play, tap your profile, then Payments and subscriptions → Subscriptions.</string>
     <string name="premium_pending">Purchase pending in Google Play</string>
     <string name="premium_unavailable">Premium is not available from Google Play right now.</string>
     <string name="premium_error">Google Play could not verify Premium. Try again.</string>
     <string name="version">Version %1$s</string>
     <string name="privacy_policy">Privacy policy</string>
+    <string name="terms_and_policies">Terms and policies</string>
+    <string name="support_coffee_note">Coffee contributions do not remove ads or activate Premium.</string>
     <string name="third_party_notices">Third-party notices</string>
     <string name="source_code">Source code</string>
     <string name="support_coffee">Support me with coffee</string>

@@ -537,6 +537,7 @@ private fun AboutDialog(onDismiss: () -> Unit) {
                 HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
                 PremiumPanel()
                 AboutLink(R.string.privacy_policy) { uriHandler.openUri(PRIVACY_URL) }
+                AboutLink(R.string.terms_and_policies) { uriHandler.openUri(TERMS_URL) }
                 PrivacyOptionsLink()
                 AboutLink(R.string.third_party_notices) { uriHandler.openUri(NOTICES_URL) }
                 AboutLink(R.string.source_code) { uriHandler.openUri(SOURCE_URL) }
@@ -558,6 +559,10 @@ private fun AboutDialog(onDismiss: () -> Unit) {
                     Spacer(Modifier.size(10.dp))
                     Text(stringResource(R.string.support_coffee))
                 }
+                Text(
+                    stringResource(R.string.support_coffee_note),
+                    style = MaterialTheme.typography.bodySmall,
+                )
             }
         },
         confirmButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.close)) } },
@@ -640,5 +645,6 @@ internal fun QrTheme(content: @Composable () -> Unit) {
 
 private const val SOURCE_URL = "https://github.com/Majkey25/QR-Code-Scanner-Creator"
 private const val PRIVACY_URL = "https://majkey25.github.io/QR-Code-Scanner-Creator/privacy.html"
+private const val TERMS_URL = "https://majkey25.github.io/QR-Code-Scanner-Creator/terms.html"
 private const val NOTICES_URL = "$SOURCE_URL/blob/main/THIRD_PARTY_NOTICES.md"
 private const val SUPPORT_URL = "https://www.buymeacoffee.com/majkey"

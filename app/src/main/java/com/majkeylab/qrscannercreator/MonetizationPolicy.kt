@@ -69,3 +69,56 @@ internal data class PremiumState(
     val purchaseAvailable: Boolean
         get() = monthlyAvailable || lifetimeAvailable
 }
+
+internal fun PremiumState.withPurchaseQueryFailure(): PremiumState =
+    copy(entitlementVerified = entitlementVerified && premium, checking = false, error = true)
+
+internal fun PremiumState.withPurchases(
+    purchases: List<PremiumPurchase>,
+    authoritative: Boolean,
+): PremiumState {
+    val entitlement = resolvePremiumEntitlement(purchases)
+    return copy(
+        premium = entitlement.premium || (!authoritative && premium),
+        entitlementVerified = authoritative || entitlement.premium || entitlementVerified,
+        pending = entitlement.pending || (!authoritative && pending),
+        checking = false,
+        error = false,
+    )
+}
+
+// SDK purchase objects stay intact; callback ordering needs no Android runtime.
+internal class PurchaseQueries<T>(private val isPremium: (T) -> Boolean) {
+    private var generation = 0L
+
+    fun invalidate() {
+        generation++
+    }
+
+    fun query(
+        queryPurchases: (PremiumPlan, (Boolean, List<T>) -> Unit) -> Unit,
+        onResult: (List<T>?) -> Unit,
+    ) {
+        val current = ++generation
+        queryPurchases(PremiumPlan.Lifetime) lifetime@{ lifetimeAvailable, lifetime ->
+            if (current != generation) return@lifetime
+            queryPurchases(PremiumPlan.Monthly) monthly@{ monthlyAvailable, monthly ->
+                if (current != generation) return@monthly
+                val purchases =
+                    (if (lifetimeAvailable) lifetime else emptyList()) +
+                        (if (monthlyAvailable) monthly else emptyList())
+                onResult(purchases.takeIf { (lifetimeAvailable && monthlyAvailable) || it.any(isPremium) })
+            }
+        }
+    }
+}
+
+internal fun openPlaySubscriptions(openUri: (String) -> Unit): Boolean =
+    try {
+        openUri("https://play.google.com/store/account/subscriptions")
+        true
+    } catch (_: IllegalArgumentException) {
+        false
+    } catch (_: SecurityException) {
+        false
+    }

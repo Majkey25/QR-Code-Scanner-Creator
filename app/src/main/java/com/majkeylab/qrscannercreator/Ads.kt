@@ -77,6 +77,8 @@ internal class ConsentGate {
         private set
     var privacyOptionsRequired by mutableStateOf(false)
         private set
+    var revision by mutableStateOf(0L)
+        private set
     private var requestStarted = false
 
     fun beginRequest(): Boolean {
@@ -85,7 +87,8 @@ internal class ConsentGate {
         return true
     }
 
-    fun update(canRequestAds: Boolean, privacyOptionsRequired: Boolean) {
+    fun update(canRequestAds: Boolean, privacyOptionsRequired: Boolean, invalidateAds: Boolean = false) {
+        if (this.canRequestAds != canRequestAds || invalidateAds) revision++
         this.canRequestAds = canRequestAds
         this.privacyOptionsRequired = privacyOptionsRequired
     }
@@ -123,17 +126,19 @@ internal object ConsentCoordinator {
     }
 
     fun showPrivacyOptions(activity: Activity) {
-        UserMessagingPlatform.showPrivacyOptionsForm(activity) {
-            updateGate(UserMessagingPlatform.getConsentInformation(activity))
+        UserMessagingPlatform.showPrivacyOptionsForm(activity) { error ->
+            updateGate(UserMessagingPlatform.getConsentInformation(activity), invalidateAds = error == null)
         }
     }
 
-    private fun updateGate(consentInformation: ConsentInformation) {
+    private fun updateGate(consentInformation: ConsentInformation, invalidateAds: Boolean = false) {
+        if (invalidateAds || !consentInformation.canRequestAds()) stopAdPreloading()
         gate.update(
             canRequestAds = consentInformation.canRequestAds(),
             privacyOptionsRequired =
                 consentInformation.privacyOptionsRequirementStatus ==
                     ConsentInformation.PrivacyOptionsRequirementStatus.REQUIRED,
+            invalidateAds = invalidateAds,
         )
     }
 }
@@ -144,6 +149,7 @@ private object AdRuntime {
     private const val LAST_INTERSTITIAL_KEY = "last_interstitial"
 
     private var dueScan: Int? = null
+    var preloadId: String? = null
 
     fun recordCompletedScan(context: Context) {
         val preferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
@@ -171,18 +177,34 @@ private object AdRuntime {
     }
 }
 
-private suspend fun ensureAdsReady(context: Context, ads: AdIds) {
+internal fun stopAdPreloading() {
+    val id = AdRuntime.preloadId
+    AdRuntime.preloadId = null
+    if (id != null && MobileAds.isInitialized) InterstitialAdPreloader.destroy(id)
+}
+
+private fun mayRequestAds(revision: Long): Boolean {
+    val state = PremiumController.state
+    val gate = ConsentCoordinator.gate
+    return revision == gate.revision && shouldShowAds(state.premium, state.entitlementVerified, gate.canRequestAds)
+}
+
+private suspend fun ensureAdsReady(context: Context, ads: AdIds, revision: Long): Boolean {
+    if (!mayRequestAds(revision)) return false
     withContext(Dispatchers.IO) {
         if (!MobileAds.isInitialized) {
             MobileAds.initialize(context, InitializationConfig.Builder(ads.appId).build())
         }
     }
+    if (!mayRequestAds(revision) || !MobileAds.isInitialized) return false
     if (InterstitialAdPreloader.getConfiguration(ads.interstitialAdUnitId) == null) {
+        AdRuntime.preloadId = ads.interstitialAdUnitId
         InterstitialAdPreloader.start(
             ads.interstitialAdUnitId,
             PreloadConfiguration(AdRequest.Builder(ads.interstitialAdUnitId).build()),
         )
     }
+    return true
 }
 
 @Composable
@@ -203,12 +225,13 @@ internal fun MonetizationBanner() {
     ) return
 
     val ads = remember(activity) { activity.adIds() }
+    val revision = ConsentCoordinator.gate.revision
     val description = stringResource(R.string.advertisement)
     BoxWithConstraints(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
         val widthDp = maxWidth.value.toInt().coerceAtLeast(1)
         val adSize = remember(widthDp) { AdSize.getInlineAdaptiveBannerAdSize(widthDp, 120) }
         val adView =
-            remember(activity, widthDp, description) {
+            remember(activity, widthDp, description, revision) {
                 AdView(activity).apply {
                     contentDescription = description
                     importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_YES
@@ -216,19 +239,20 @@ internal fun MonetizationBanner() {
             }
         var visible by remember(adView) { mutableStateOf(true) }
         var loaded by remember(adView) { mutableStateOf(false) }
+        var active by remember(adView) { mutableStateOf(true) }
 
         LaunchedEffect(adView, adSize) {
             try {
-                ensureAdsReady(activity.applicationContext, ads)
+                if (!ensureAdsReady(activity.applicationContext, ads, revision) || !active) return@LaunchedEffect
                 adView.loadAd(
                     BannerAdRequest.Builder(ads.bannerAdUnitId, adSize).build(),
                     object : AdLoadCallback<BannerAd> {
                         override fun onAdLoaded(ad: BannerAd) {
-                            loaded = true
+                            if (active && mayRequestAds(revision)) loaded = true
                         }
 
                         override fun onAdFailedToLoad(adError: LoadAdError) {
-                            visible = false
+                            if (active) visible = false
                         }
                     },
                 )
@@ -238,7 +262,12 @@ internal fun MonetizationBanner() {
                 visible = false
             }
         }
-        DisposableEffect(adView) { onDispose { adView.destroy() } }
+        DisposableEffect(adView) {
+            onDispose {
+                active = false
+                adView.destroy()
+            }
+        }
 
         if (visible && loaded) {
             Surface(
@@ -271,7 +300,7 @@ internal fun showScanInterstitial(activity: Activity, onComplete: () -> Unit) {
     val state = PremiumController.state
     if (
         activity.isFinishing || activity.isDestroyed || state.premium ||
-        !state.entitlementVerified || !ConsentCoordinator.gate.canRequestAds
+        !state.entitlementVerified || !ConsentCoordinator.gate.canRequestAds || !MobileAds.isInitialized
     ) {
         onComplete()
         return
