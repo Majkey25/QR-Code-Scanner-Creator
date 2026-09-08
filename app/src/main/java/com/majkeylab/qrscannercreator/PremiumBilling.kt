@@ -28,7 +28,10 @@ internal object PremiumController : PurchasesUpdatedListener {
     private val mainHandler = Handler(Looper.getMainLooper())
     private var billingClient: BillingClient? = null
     private var offers: Map<PremiumPlan, BillingOffer> = emptyMap()
-    private var purchasesByType: Map<String, List<Purchase>> = emptyMap()
+    private val purchaseQueries = PurchaseQueries<Purchase> {
+        it.purchaseState == Purchase.PurchaseState.PURCHASED && it.products.any(PREMIUM_PRODUCT_IDS::contains)
+    }
+    private var productGeneration = 0L
     private var connectionStarted = false
 
     var state by mutableStateOf(PremiumState())
@@ -54,7 +57,7 @@ internal object PremiumController : PurchasesUpdatedListener {
     fun launchPurchase(activity: Activity, plan: PremiumPlan) {
         val client = billingClient
         val offer = offers[plan]
-        if (client == null || !client.isReady || offer == null) {
+        if (!state.canStartPurchase || client == null || !client.isReady || offer == null) {
             updateState { it.copy(error = true) }
             return
         }
@@ -70,19 +73,34 @@ internal object PremiumController : PurchasesUpdatedListener {
                     .setProductDetailsParamsList(listOf(productParams))
                     .build(),
             )
-        if (result.responseCode != BillingClient.BillingResponseCode.OK) {
-            updateState { it.copy(error = true) }
+        when (result.responseCode) {
+            BillingClient.BillingResponseCode.OK -> Unit
+            BillingClient.BillingResponseCode.ITEM_ALREADY_OWNED -> queryPurchases(client)
+            else -> updateState { it.copy(error = true) }
         }
     }
 
     override fun onPurchasesUpdated(result: BillingResult, purchases: List<Purchase>?) {
-        when (result.responseCode) {
-            BillingClient.BillingResponseCode.OK -> {
-                purchases?.takeIf { it.isNotEmpty() }?.let(::processPurchases)
-                billingClient?.takeIf { it.isReady }?.let(::queryPurchases)
+        onMain {
+            when (result.responseCode) {
+                BillingClient.BillingResponseCode.OK -> {
+                    purchaseQueries.invalidate()
+                    val updated = purchases.orEmpty().filter { it.products.any(PREMIUM_PRODUCT_IDS::contains) }
+                    if (updated.isNotEmpty()) processPurchases(updated, authoritative = false)
+                    val client = billingClient
+                    if (client != null && client.isReady) {
+                        queryPurchases(client)
+                    } else if (updated.isEmpty()) {
+                        markBillingUnavailable()
+                    }
+                }
+                BillingClient.BillingResponseCode.ITEM_ALREADY_OWNED -> {
+                    val client = billingClient
+                    if (client != null && client.isReady) queryPurchases(client) else markBillingUnavailable()
+                }
+                BillingClient.BillingResponseCode.USER_CANCELED -> Unit
+                else -> markBillingUnavailable()
             }
-            BillingClient.BillingResponseCode.USER_CANCELED -> Unit
-            else -> markBillingUnavailable()
         }
     }
 
@@ -92,25 +110,30 @@ internal object PremiumController : PurchasesUpdatedListener {
         client.startConnection(
             object : BillingClientStateListener {
                 override fun onBillingSetupFinished(result: BillingResult) {
-                    connectionStarted = false
-                    if (result.responseCode == BillingClient.BillingResponseCode.OK) {
-                        queryProduct(client)
-                        queryPurchases(client)
-                    } else {
-                        markBillingUnavailable()
+                    onMain {
+                        connectionStarted = false
+                        if (result.responseCode == BillingClient.BillingResponseCode.OK) {
+                            queryProduct(client)
+                            queryPurchases(client)
+                        } else {
+                            markBillingUnavailable()
+                        }
                     }
                 }
 
                 override fun onBillingServiceDisconnected() {
-                    connectionStarted = false
-                    markBillingUnavailable()
+                    onMain {
+                        connectionStarted = false
+                        markBillingUnavailable()
+                    }
                 }
             },
         )
     }
 
     private fun queryProduct(client: BillingClient) {
-        synchronized(this) { offers = emptyMap() }
+        val generation = ++productGeneration
+        offers = emptyMap()
         updateState {
             it.copy(
                 monthlyPrice = null,
@@ -119,11 +142,11 @@ internal object PremiumController : PurchasesUpdatedListener {
                 lifetimeAvailable = false,
             )
         }
-        queryProduct(client, PremiumPlan.Lifetime, BillingClient.ProductType.INAPP)
-        queryProduct(client, PremiumPlan.Monthly, BillingClient.ProductType.SUBS)
+        queryProduct(client, PremiumPlan.Lifetime, BillingClient.ProductType.INAPP, generation)
+        queryProduct(client, PremiumPlan.Monthly, BillingClient.ProductType.SUBS, generation)
     }
 
-    private fun queryProduct(client: BillingClient, plan: PremiumPlan, productType: String) {
+    private fun queryProduct(client: BillingClient, plan: PremiumPlan, productType: String, generation: Long) {
         val product =
             QueryProductDetailsParams.Product.newBuilder()
                 .setProductId(plan.productId)
@@ -132,41 +155,39 @@ internal object PremiumController : PurchasesUpdatedListener {
         client.queryProductDetailsAsync(
             QueryProductDetailsParams.newBuilder().setProductList(listOf(product)).build(),
         ) { result, detailsResult ->
-            if (result.responseCode != BillingClient.BillingResponseCode.OK) {
-                updateOffer(plan, offer = null, price = null)
-                return@queryProductDetailsAsync
+            onMain product@{
+                if (generation != productGeneration) return@product
+                if (result.responseCode != BillingClient.BillingResponseCode.OK) {
+                    updateOffer(plan, offer = null, price = null)
+                    return@product
+                }
+                val details = detailsResult.productDetailsList.firstOrNull { it.productId == plan.productId }
+                val monthlyOffer = details?.subscriptionOfferDetails?.firstOrNull {
+                    it.basePlanId == "monthly" && it.offerId == null
+                }
+                val token =
+                    when (plan) {
+                        PremiumPlan.Monthly -> monthlyOffer?.offerToken
+                        PremiumPlan.Lifetime -> details?.oneTimePurchaseOfferDetailsList?.firstOrNull()?.offerToken
+                    }
+                val price =
+                    when (plan) {
+                        PremiumPlan.Monthly ->
+                            monthlyOffer?.pricingPhases?.pricingPhaseList?.lastOrNull()?.formattedPrice
+                        PremiumPlan.Lifetime ->
+                            details?.oneTimePurchaseOfferDetailsList?.firstOrNull()?.formattedPrice
+                    }
+                updateOffer(
+                    plan,
+                    offer = if (details != null && token != null) BillingOffer(details, token) else null,
+                    price = price,
+                )
             }
-            val details = detailsResult.productDetailsList.firstOrNull { it.productId == plan.productId }
-            val token =
-                when (plan) {
-                    PremiumPlan.Monthly -> details?.subscriptionOfferDetails?.firstOrNull()?.offerToken
-                    PremiumPlan.Lifetime -> details?.oneTimePurchaseOfferDetailsList?.firstOrNull()?.offerToken
-                }
-            val price =
-                when (plan) {
-                    PremiumPlan.Monthly ->
-                        details?.subscriptionOfferDetails?.firstOrNull()
-                            ?.pricingPhases?.pricingPhaseList?.lastOrNull()?.formattedPrice
-                    PremiumPlan.Lifetime ->
-                        details?.oneTimePurchaseOfferDetailsList?.firstOrNull()?.formattedPrice
-                }
-            updateOffer(
-                plan,
-                offer = if (details != null && token != null) BillingOffer(details, token) else null,
-                price = price,
-            )
         }
     }
 
     private fun updateOffer(plan: PremiumPlan, offer: BillingOffer?, price: String?) {
-        synchronized(this) {
-            offers =
-                if (offer == null) {
-                    offers - plan
-                } else {
-                    offers + (plan to offer)
-                }
-        }
+        offers = if (offer == null) offers - plan else offers + (plan to offer)
         updateState {
             when (plan) {
                 PremiumPlan.Monthly ->
@@ -178,58 +199,40 @@ internal object PremiumController : PurchasesUpdatedListener {
     }
 
     private fun queryPurchases(client: BillingClient) {
-        synchronized(this) { purchasesByType = emptyMap() }
-        queryPurchases(client, BillingClient.ProductType.INAPP)
-        queryPurchases(client, BillingClient.ProductType.SUBS)
-    }
-
-    private fun queryPurchases(client: BillingClient, productType: String) {
-        client.queryPurchasesAsync(
-            QueryPurchasesParams.newBuilder()
-                .setProductType(productType)
-                .build(),
-        ) { result, purchases ->
-            if (result.responseCode == BillingClient.BillingResponseCode.OK) {
-                val combined =
-                    synchronized(this) {
-                        purchasesByType = purchasesByType + (productType to purchases)
-                        purchasesByType.takeIf { it.size == 2 }?.values?.flatten()
-                    }
-                combined?.let(::processPurchases)
-            } else {
-                markBillingUnavailable()
+        updateState { it.copy(checking = true, error = false) }
+        purchaseQueries.query({ plan, callback ->
+            val productType = when (plan) {
+                PremiumPlan.Lifetime -> BillingClient.ProductType.INAPP
+                PremiumPlan.Monthly -> BillingClient.ProductType.SUBS
             }
+            client.queryPurchasesAsync(
+                QueryPurchasesParams.newBuilder().setProductType(productType).build(),
+            ) { result, purchases ->
+                onMain { callback(result.responseCode == BillingClient.BillingResponseCode.OK, purchases) }
+            }
+        }) { purchases ->
+            if (purchases != null) processPurchases(purchases) else markBillingUnavailable()
         }
     }
 
-    private fun processPurchases(purchases: List<Purchase>) {
+    private fun processPurchases(purchases: List<Purchase>, authoritative: Boolean = true) {
         val premiumPurchases = purchases.filter { purchase -> purchase.products.any(PREMIUM_PRODUCT_IDS::contains) }
-        val entitlement =
-            resolvePremiumEntitlement(
-                premiumPurchases.map {
-                    PremiumPurchase(
-                        productIds = it.products.toSet(),
-                        state =
-                            when (it.purchaseState) {
-                                Purchase.PurchaseState.PURCHASED -> PremiumPurchaseState.Purchased
-                                Purchase.PurchaseState.PENDING -> PremiumPurchaseState.Pending
-                                else -> PremiumPurchaseState.Unknown
-                            },
-                    )
-                },
-            )
+        val records =
+            premiumPurchases.map {
+                PremiumPurchase(
+                    productIds = it.products.toSet(),
+                    state =
+                        when (it.purchaseState) {
+                            Purchase.PurchaseState.PURCHASED -> PremiumPurchaseState.Purchased
+                            Purchase.PurchaseState.PENDING -> PremiumPurchaseState.Pending
+                            else -> PremiumPurchaseState.Unknown
+                        },
+                )
+            }
         premiumPurchases
             .filter { it.purchaseState == Purchase.PurchaseState.PURCHASED && !it.isAcknowledged }
             .forEach(::acknowledge)
-        updateState {
-            it.copy(
-                premium = entitlement.premium,
-                entitlementVerified = true,
-                checking = false,
-                pending = entitlement.pending,
-                error = false,
-            )
-        }
+        updateState { it.withPurchases(records, authoritative) }
     }
 
     private fun acknowledge(purchase: Purchase) {
@@ -245,16 +248,17 @@ internal object PremiumController : PurchasesUpdatedListener {
     }
 
     private fun updateState(update: (PremiumState) -> PremiumState) {
-        mainHandler.post { state = update(state) }
+        onMain {
+            state = update(state)
+            if (state.premium || !state.entitlementVerified) stopAdPreloading()
+        }
     }
 
     private fun markBillingUnavailable() {
-        updateState {
-            it.copy(
-                entitlementVerified = it.entitlementVerified || BuildConfig.DEBUG,
-                checking = false,
-                error = true,
-            )
-        }
+        updateState { it.withPurchaseQueryFailure() }
+    }
+
+    private fun onMain(action: () -> Unit) {
+        if (Looper.myLooper() == Looper.getMainLooper()) action() else mainHandler.post { action() }
     }
 }

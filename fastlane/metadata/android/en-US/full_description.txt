@@ -3,7 +3,7 @@ Scan QR codes with your camera or from a gallery image, then create and share yo
 Scanner
 • CameraX and ZXing process QR codes locally.
 • Select a QR image with Android Photo Picker.
-• Open safe web links.
+• Open selected web links in your browser. QR recognition does not verify a destination's safety.
 • Connect or save Wi-Fi through Android confirmation.
 • Add contacts and calendar events.
 • Open the dialer, Messages, email, and Maps.

@@ -16,7 +16,12 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -25,6 +30,8 @@ import androidx.compose.ui.unit.dp
 internal fun PremiumPanel() {
     val activity = LocalActivity.current ?: return
     val state = PremiumController.state
+    val uriHandler = LocalUriHandler.current
+    var managementError by remember { mutableStateOf(false) }
     LaunchedEffect(activity) { PremiumController.refresh(activity) }
 
     Surface(
@@ -49,6 +56,10 @@ internal fun PremiumPanel() {
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
             if (!state.premium) {
+                Text(
+                    stringResource(R.string.premium_terms),
+                    style = MaterialTheme.typography.bodySmall,
+                )
                 when {
                     state.pending -> Text(stringResource(R.string.premium_pending))
                     state.error && state.purchaseAvailable -> Text(
@@ -60,7 +71,7 @@ internal fun PremiumPanel() {
                 }
                 OutlinedButton(
                     onClick = { PremiumController.launchPurchase(activity, PremiumPlan.Monthly) },
-                    enabled = state.monthlyAvailable && !state.pending && !state.checking,
+                    enabled = state.monthlyAvailable && state.canStartPurchase,
                     modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp),
                 ) {
                     Text(
@@ -71,7 +82,7 @@ internal fun PremiumPanel() {
                 }
                 Button(
                     onClick = { PremiumController.launchPurchase(activity, PremiumPlan.Lifetime) },
-                    enabled = state.lifetimeAvailable && !state.pending && !state.checking,
+                    enabled = state.lifetimeAvailable && state.canStartPurchase,
                     modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp),
                 ) {
                     Text(
@@ -80,12 +91,21 @@ internal fun PremiumPanel() {
                         } ?: stringResource(R.string.premium_lifetime),
                     )
                 }
-                TextButton(
-                    onClick = { PremiumController.refresh(activity) },
-                    modifier = Modifier.fillMaxWidth(),
-                ) {
-                    Text(stringResource(R.string.premium_restore))
-                }
+            }
+            TextButton(
+                onClick = { PremiumController.refresh(activity) },
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                Text(stringResource(R.string.premium_restore))
+            }
+            TextButton(
+                onClick = { managementError = !openPlaySubscriptions(uriHandler::openUri) },
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                Text(stringResource(R.string.premium_manage))
+            }
+            if (managementError) {
+                Text(stringResource(R.string.premium_manage_error), color = MaterialTheme.colorScheme.error)
             }
         }
     }

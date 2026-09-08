@@ -1,5 +1,18 @@
 # Changelog
 
+## 1.1.5 - 2026-09-08
+
+- Fixed monthly and lifetime Premium restoration when one Google Play product query fails.
+- Ignore outdated purchase queries and preserve existing Premium while another purchase is pending.
+- Block another purchase until Google Play confirms ownership, including while a purchase is pending or Premium is already active.
+- Added subscription management and cancellation in About, including when Premium is active.
+- Explain optional monthly renewal and one-time lifetime billing before purchase.
+- Stop ad preloading after Premium activation and invalidate cached ads when privacy choices change.
+- Keep late ad callbacks from restoring a dismissed banner.
+- Added a private privacy-contact address and clarified SDK storage and subscription management.
+- Added linked terms, refund and cookie policies, keyboard navigation and light/dark contrast checks for the website.
+- Clarified that coffee contributions do not activate Premium and that QR recognition does not verify a destination's safety.
+
 ## 1.1.4 - 2026-08-25
 
 - Made the floating navigation controls fully opaque for consistent readability.

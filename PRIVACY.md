@@ -1,8 +1,12 @@
 # Privacy policy
 
-Effective date: August 24, 2026
+Effective date: September 8, 2026
+
+The canonical policy is published on [GitHub Pages](https://majkey25.github.io/QR-Code-Scanner-Creator/privacy.html), with source in [docs/privacy.html](docs/privacy.html).
 
 QR Code Scanner & Creator keeps scanning and QR creation on your Android device. The app has no developer-operated account system or remote backend.
+
+The maintainer is Matěj Teplý, publishing as Majkey. Contact [majkeylab@gmail.com](mailto:majkeylab@gmail.com) for support or requests about information handled by the maintainer.
 
 ## QR content, camera, and selected images
 
@@ -28,11 +32,23 @@ QR Premium is offered as an auto-renewing monthly subscription or a one-time lif
 
 See [Google Play's privacy notice](https://policies.google.com/privacy).
 
+Purchases belong to the Google Play account that bought them. Use Restore purchase in About with that account on another device. Pending purchases do not activate Premium. You can [manage or cancel a monthly subscription in Google Play](https://play.google.com/store/account/subscriptions); version 1.1.5 also links there directly from About. Lifetime Premium is a one-time purchase, not a recurring subscription. Scanning and QR creation do not require a purchase.
+
 ## Local storage and retention
 
-The app does not maintain a QR history or cloud copy. It stores only a local completed-scan counter and last-ad timestamp to limit full-screen ad frequency. Android manages temporary cache files. Clearing app data or uninstalling removes this local data.
+The app does not maintain a QR history or developer-operated cloud copy. Its settings store a completed-scan counter and last-ad timestamp to limit full-screen ad frequency. Google's advertising and consent components also manage their own on-device preferences and caches. Android manages temporary cache files. Clearing app data or uninstalling removes local app data, but does not cancel a subscription or remove copies held by Google or a sharing destination.
 
 Google and any app you choose to open may retain data under their own policies.
+
+## This website and support
+
+GitHub Pages hosts this website and processes visitor information, including IP addresses, under [GitHub's privacy statement](https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement). This site adds no analytics or advertising.
+
+Private support email is used to answer and investigate your request. The retention rule is deletion within 90 days after the case closes. A case closes when resolved, or after 90 days waiting for the requester's reply. Records needed for an actual unresolved refund, dispute or legal preservation duty are retained until that matter is resolved or the applicable statutory period ends; unrelated correspondence follows the 90-day rule. You can request earlier deletion where applicable rights allow it.
+
+Public GitHub issues are visible to everyone and form the project's technical issue history. GitHub hosts them under its own privacy terms. Do not post private QR content, passwords or payment information. Contact the maintainer to request removal of personal information from content the maintainer controls.
+
+This site has no forms or mailing list. Support requests are not consent to marketing. The canonical policy describes the purposes and legal bases of support handling, applicable data rights, complaints and provider processing. The [cookie policy](https://majkey25.github.io/QR-Code-Scanner-Creator/cookies.html) distinguishes this static website from advertising in the Android app.
 
 ## Children
 
@@ -44,4 +60,4 @@ Material policy changes will be published on this page and included with a new a
 
 ## Contact
 
-For privacy questions, open an issue in the [public repository](https://github.com/Majkey25/QR-Code-Scanner-Creator/issues).
+For privacy questions or deletion requests about support correspondence, email [majkeylab@gmail.com](mailto:majkeylab@gmail.com). Use the [public repository](https://github.com/Majkey25/QR-Code-Scanner-Creator/issues) only for non-sensitive reports.
