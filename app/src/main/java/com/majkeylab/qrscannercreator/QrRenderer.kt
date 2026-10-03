@@ -50,7 +50,7 @@ data class QrImage(
 }
 
 object QrRenderer {
-    fun renderPixels(payload: String, style: ParsedQrStyle, size: Int = 1024): QrImage {
+    fun renderPixels(payload: String, style: ParsedQrStyle, size: Int = 2048): QrImage {
         require(payload.isNotBlank()) { "QR content is required" }
         require(payload.toByteArray(Charsets.UTF_8).size <= MAX_QR_CONTENT_BYTES) {
             "QR content is too long"

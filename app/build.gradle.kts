@@ -13,8 +13,8 @@ android {
         applicationId = "com.majkeylab.qrscannercreator"
         minSdk = 29
         targetSdk = 37
-        versionCode = 8
-        versionName = "1.1.5"
+        versionCode = 9
+        versionName = "1.1.6"
     }
 
     signingConfigs {
