@@ -13,7 +13,7 @@ An Android QR scanner and creator. Scan with CameraX or from the gallery, act on
 - Opens selected web links in your browser and passes Wi-Fi, contacts, calls, email, SMS, maps, and calendar events to Android apps. QR recognition does not prove a destination is safe.
 - Creates text, website, Wi-Fi, contact, email, phone, SMS, location, and event QR codes.
 - Changes module, finder, and background colors; supports square, rounded, or dot modules and an optional logo.
-- Shares generated PNG files without storage permission.
+- Shares native 2048 × 2048 PNG files without storage permission.
 - Shows restrained ads with consent controls; monthly or lifetime QR Premium removes every ad through Google Play.
 - Includes English and Czech UI.
 

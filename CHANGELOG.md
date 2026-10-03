@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.1.6 - 2026-10-03
+
+- Generate and share QR codes as native 2048 × 2048 PNG files instead of 1024 × 1024.
+- Keep QR preview edges sharp without image smoothing.
+
 ## 1.1.5 - 2026-09-08
 
 - Fixed monthly and lifetime Premium restoration when one Google Play product query fails.

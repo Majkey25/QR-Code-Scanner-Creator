@@ -10,6 +10,35 @@ import org.junit.Test
 
 class QrRendererTest {
     @Test
+    fun defaultExportIsHighResolutionWithSharpModulesAndDecodes() {
+        val content = "WIFI:T:WPA;S:Guest;P:password123;H:false;;"
+        for (shape in ModuleShape.entries) {
+            val style = QrStyle(moduleShape = shape).parse().getOrThrow()
+            val image = QrRenderer.renderPixels(content, style)
+
+            assertEquals(2048, image.size)
+            assertEquals(2048 * 2048, image.pixels.size)
+            assertTrue(image.pixels.all { it == style.background || it == style.foreground || it == style.finder })
+            val source = RGBLuminanceSource(image.size, image.size, image.pixels)
+            val decoded = MultiFormatReader().decode(BinaryBitmap(HybridBinarizer(source)))
+            assertEquals(content, decoded.text)
+        }
+    }
+
+    @Test
+    fun highResolutionDenseContentKeepsQuietZoneAndDecodes() {
+        val content = "Text for printing. ".repeat(50)
+        val style = QrStyle(moduleShape = ModuleShape.SQUARE).parse().getOrThrow()
+        val image = QrRenderer.renderPixels(content, style)
+        val source = RGBLuminanceSource(image.size, image.size, image.pixels)
+        val decoded = MultiFormatReader().decode(BinaryBitmap(HybridBinarizer(source)))
+
+        assertEquals(style.background, image.pixels.first())
+        assertEquals(style.background, image.pixels.last())
+        assertEquals(content, decoded.text)
+    }
+
+    @Test
     fun rendererRejectsTinyImages() {
         val error = runCatching { QrRenderer.renderPixels("hello", QrStyle().parse().getOrThrow(), 120) }
         assertTrue(error.isFailure)
