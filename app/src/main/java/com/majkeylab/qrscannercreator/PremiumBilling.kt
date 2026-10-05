@@ -250,7 +250,6 @@ internal object PremiumController : PurchasesUpdatedListener {
     private fun updateState(update: (PremiumState) -> PremiumState) {
         onMain {
             state = update(state)
-            if (state.premium || !state.entitlementVerified) stopAdPreloading()
         }
     }
 

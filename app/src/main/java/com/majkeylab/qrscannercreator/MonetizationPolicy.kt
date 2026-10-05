@@ -3,21 +3,11 @@ package com.majkeylab.qrscannercreator
 internal const val PREMIUM_PRODUCT_ID = "qr_scanner_creator_premium"
 internal const val PREMIUM_MONTHLY_PRODUCT_ID = "qr_scanner_creator_premium_monthly"
 internal val PREMIUM_PRODUCT_IDS = setOf(PREMIUM_PRODUCT_ID, PREMIUM_MONTHLY_PRODUCT_ID)
-private const val INTERSTITIAL_COOLDOWN_MILLIS = 300_000L
 
 internal enum class PremiumPlan(val productId: String) {
     Monthly(PREMIUM_MONTHLY_PRODUCT_ID),
     Lifetime(PREMIUM_PRODUCT_ID),
 }
-
-internal fun isInterstitialDue(
-    completedScans: Int,
-    nowMillis: Long,
-    lastShownMillis: Long?,
-): Boolean =
-    completedScans > 0 &&
-        completedScans % 5 == 0 &&
-        (lastShownMillis == null || nowMillis - lastShownMillis >= INTERSTITIAL_COOLDOWN_MILLIS)
 
 internal fun shouldShowAds(
     premium: Boolean,

@@ -27,20 +27,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
-import androidx.core.content.edit
 import com.google.android.libraries.ads.mobile.sdk.MobileAds
 import com.google.android.libraries.ads.mobile.sdk.banner.AdSize
 import com.google.android.libraries.ads.mobile.sdk.banner.AdView
 import com.google.android.libraries.ads.mobile.sdk.banner.BannerAd
 import com.google.android.libraries.ads.mobile.sdk.banner.BannerAdRequest
 import com.google.android.libraries.ads.mobile.sdk.common.AdLoadCallback
-import com.google.android.libraries.ads.mobile.sdk.common.AdRequest
-import com.google.android.libraries.ads.mobile.sdk.common.FullScreenContentError
 import com.google.android.libraries.ads.mobile.sdk.common.LoadAdError
-import com.google.android.libraries.ads.mobile.sdk.common.PreloadConfiguration
 import com.google.android.libraries.ads.mobile.sdk.initialization.InitializationConfig
-import com.google.android.libraries.ads.mobile.sdk.interstitial.InterstitialAdEventCallback
-import com.google.android.libraries.ads.mobile.sdk.interstitial.InterstitialAdPreloader
 import com.google.android.ump.ConsentDebugSettings
 import com.google.android.ump.ConsentInformation
 import com.google.android.ump.ConsentRequestParameters
@@ -52,7 +46,6 @@ import kotlinx.coroutines.withContext
 internal data class AdIds(
     val appId: String,
     val bannerAdUnitId: String,
-    val interstitialAdUnitId: String,
 )
 
 internal object MonetizationConfig {
@@ -61,13 +54,11 @@ internal object MonetizationConfig {
             AdIds(
                 appId = "ca-app-pub-6991329209066655~5561017627",
                 bannerAdUnitId = "ca-app-pub-3940256099942544/9214589741",
-                interstitialAdUnitId = "ca-app-pub-3940256099942544/1033173712",
             )
         } else {
             AdIds(
                 appId = "ca-app-pub-6991329209066655~5561017627",
                 bannerAdUnitId = "ca-app-pub-6991329209066655/6914512227",
-                interstitialAdUnitId = "ca-app-pub-6991329209066655/1662185545",
             )
         }
 }
@@ -132,7 +123,6 @@ internal object ConsentCoordinator {
     }
 
     private fun updateGate(consentInformation: ConsentInformation, invalidateAds: Boolean = false) {
-        if (invalidateAds || !consentInformation.canRequestAds()) stopAdPreloading()
         gate.update(
             canRequestAds = consentInformation.canRequestAds(),
             privacyOptionsRequired =
@@ -141,46 +131,6 @@ internal object ConsentCoordinator {
             invalidateAds = invalidateAds,
         )
     }
-}
-
-private object AdRuntime {
-    private const val PREFS_NAME = "ads"
-    private const val COMPLETED_SCANS_KEY = "completed_scans"
-    private const val LAST_INTERSTITIAL_KEY = "last_interstitial"
-
-    private var dueScan: Int? = null
-    var preloadId: String? = null
-
-    fun recordCompletedScan(context: Context) {
-        val preferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-        val current = preferences.getInt(COMPLETED_SCANS_KEY, 0)
-        val next = if (current == Int.MAX_VALUE) 1 else current + 1
-        preferences.edit { putInt(COMPLETED_SCANS_KEY, next) }
-        dueScan = next.takeIf { it % 5 == 0 }
-    }
-
-    fun isDue(context: Context, nowMillis: Long): Boolean {
-        val preferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-        val completed = preferences.getInt(COMPLETED_SCANS_KEY, 0)
-        val lastShown = preferences.getLong(LAST_INTERSTITIAL_KEY, 0L).takeIf { it > 0L }
-        return dueScan == completed && isInterstitialDue(completed, nowMillis, lastShown)
-    }
-
-    fun consume() {
-        dueScan = null
-    }
-
-    fun markShown(context: Context, nowMillis: Long) {
-        context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-            .edit { putLong(LAST_INTERSTITIAL_KEY, nowMillis) }
-        dueScan = null
-    }
-}
-
-internal fun stopAdPreloading() {
-    val id = AdRuntime.preloadId
-    AdRuntime.preloadId = null
-    if (id != null && MobileAds.isInitialized) InterstitialAdPreloader.destroy(id)
 }
 
 private fun mayRequestAds(revision: Long): Boolean {
@@ -196,15 +146,7 @@ private suspend fun ensureAdsReady(context: Context, ads: AdIds, revision: Long)
             MobileAds.initialize(context, InitializationConfig.Builder(ads.appId).build())
         }
     }
-    if (!mayRequestAds(revision) || !MobileAds.isInitialized) return false
-    if (InterstitialAdPreloader.getConfiguration(ads.interstitialAdUnitId) == null) {
-        AdRuntime.preloadId = ads.interstitialAdUnitId
-        InterstitialAdPreloader.start(
-            ads.interstitialAdUnitId,
-            PreloadConfiguration(AdRequest.Builder(ads.interstitialAdUnitId).build()),
-        )
-    }
-    return true
+    return mayRequestAds(revision) && MobileAds.isInitialized
 }
 
 @Composable
@@ -289,50 +231,6 @@ internal fun MonetizationBanner() {
                 }
             }
         }
-    }
-}
-
-internal fun recordCompletedScan(context: Context) {
-    AdRuntime.recordCompletedScan(context.applicationContext)
-}
-
-internal fun showScanInterstitial(activity: Activity, onComplete: () -> Unit) {
-    val state = PremiumController.state
-    if (
-        activity.isFinishing || activity.isDestroyed || state.premium ||
-        !state.entitlementVerified || !ConsentCoordinator.gate.canRequestAds || !MobileAds.isInitialized
-    ) {
-        onComplete()
-        return
-    }
-    val now = System.currentTimeMillis()
-    if (!AdRuntime.isDue(activity, now)) {
-        onComplete()
-        return
-    }
-    AdRuntime.consume()
-    val ad = InterstitialAdPreloader.pollAd(activity.adIds().interstitialAdUnitId)
-    if (ad == null) {
-        onComplete()
-        return
-    }
-    var completed = false
-    fun finish() {
-        if (completed) return
-        completed = true
-        onComplete()
-    }
-    AdRuntime.markShown(activity, now)
-    ad.adEventCallback =
-        object : InterstitialAdEventCallback {
-            override fun onAdDismissedFullScreenContent() = finish()
-
-            override fun onAdFailedToShowFullScreenContent(fullScreenContentError: FullScreenContentError) = finish()
-        }
-    try {
-        ad.show(activity)
-    } catch (_: RuntimeException) {
-        finish()
     }
 }
 
