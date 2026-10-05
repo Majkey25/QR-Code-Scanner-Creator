@@ -22,9 +22,11 @@ Privacy
 • No QR history or cloud backend.
 
 Free & Premium
-• The free version contains restrained banner ads.
-• Full-screen ads appear only after completed scans and no more than once every five minutes.
-• Choose monthly Premium or one lifetime purchase through your Google Play account.
+• The free version contains banner ads.
+• Version 1.1.7 shows scan results without full-screen ads.
+• Optional QR Premium removes ads. Choose monthly or lifetime Premium through your Google Play account.
+• Monthly Premium renews automatically until canceled in Google Play. Lifetime Premium is a one-time purchase.
+• The price is shown before you confirm a purchase.
 • Google consent and ad privacy controls are built in where required.
 
 Requires Android 10 or newer.
