@@ -1,6 +1,7 @@
 <resources>
     <string name="app_name">QR Code Scanner &amp; Creator</string>
     <string name="share_qr_code">Share QR code</string>
+    <string name="share_image_failed">Could not prepare or share this QR code. Try again.</string>
     <string name="share_qr_content">Share QR content</string>
     <string name="scan">Scan</string>
     <string name="create">Create</string>

@@ -91,7 +91,7 @@ fun QrApp(
     onPickPhone: () -> Unit,
     onPickLogo: () -> Unit,
     onClearLogo: () -> Unit,
-    onShareImage: (QrImage) -> Unit,
+    onShareImage: suspend (QrImage) -> Unit,
 ) {
     QrTheme {
         var tab by remember { mutableStateOf(AppTab.SCAN) }

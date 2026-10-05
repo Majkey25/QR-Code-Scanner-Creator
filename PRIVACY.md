@@ -36,6 +36,8 @@ Purchases belong to the Google Play account that bought them. Use Restore purcha
 
 ## Local storage and retention
 
+From version 1.1.8, each shared PNG has a separate file in private app cache. Before another share, the app removes cached share files older than 24 hours and limits previous files to seven, then creates the next file. Up to eight files are retained. This cleanup runs only when another share is requested, not on a 24-hour timer. Without another share, files may remain until Android reclaims cache or you clear app cache or data, or uninstall. Copies already saved by a sharing destination are unaffected.
+
 The app does not maintain a QR history or developer-operated cloud copy. From version 1.1.7, scanning results are shown without full-screen ads and the app no longer records scan counters or ad timestamps. Earlier versions used those two local values to limit full-screen ad frequency; values left by an earlier installation can be removed by clearing app data. Google's banner advertising and consent components manage their own on-device preferences and caches. Android manages temporary cache files. Clearing app data or uninstalling removes local app data, but does not cancel a subscription or remove copies held by Google or a sharing destination.
 
 Google and any app you choose to open may retain data under their own policies.

@@ -1,6 +1,7 @@
 <resources>
     <string name="app_name">QR skener a tvůrce</string>
     <string name="share_qr_code">Sdílet QR kód</string>
+    <string name="share_image_failed">QR kód se nepodařilo připravit nebo sdílet. Zkuste to znovu.</string>
     <string name="share_qr_content">Sdílet obsah QR kódu</string>
     <string name="scan">Skenovat</string>
     <string name="create">Vytvořit</string>

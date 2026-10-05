@@ -1,0 +1,1 @@
+QR sharing prepares 2048 × 2048 PNG files in the background. Leaving the app or changing the QR cancels a pending share. Each share uses a separate temporary file. Clearer error messages let you retry safely.

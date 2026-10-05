@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.1.8 - 2026-10-05
+
+- Prepare shared PNG files off the UI thread while preserving 2048 × 2048 output.
+- Cancel pending shares when the app pauses, the QR changes, or the Create screen closes.
+- Give each share a separate temporary file so later shares do not replace earlier content.
+- Limit shared-file cache to eight entries and clean files older than 24 hours on the next share.
+- Show preparation failures beside Share and allow retry.
+
 ## 1.1.7 - 2026-10-05
 
 - Show decoded QR results immediately without a full-screen ad gate.
