@@ -1,0 +1,1 @@
+Sdílení QR připravuje obrázky PNG v rozlišení 2048 × 2048 na pozadí. Opuštění aplikace nebo změna QR kódu zruší čekající sdílení. Každé sdílení používá samostatný dočasný soubor. Srozumitelnější chybové zprávy umožní bezpečné opakování.

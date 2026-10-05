@@ -9,7 +9,13 @@ import com.google.zxing.EncodeHintType
 import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel
 import com.google.zxing.qrcode.encoder.Encoder
 import java.io.File
-import java.io.FileOutputStream
+import java.io.IOException
+import java.io.OutputStream
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ensureActive
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.withContext
 
 data class QrImage(
     val size: Int,
@@ -50,6 +56,8 @@ data class QrImage(
 }
 
 object QrRenderer {
+    private val shareMutex = Mutex()
+
     fun renderPixels(payload: String, style: ParsedQrStyle, size: Int = 2048): QrImage {
         require(payload.isNotBlank()) { "QR content is required" }
         require(payload.toByteArray(Charsets.UTF_8).size <= MAX_QR_CONTENT_BYTES) {
@@ -86,28 +94,63 @@ object QrRenderer {
         return QrImage(size, pixels, style.background)
     }
 
-    fun share(context: Context, image: QrImage) {
-        val directory = File(context.cacheDir, "shared").also { check(it.exists() || it.mkdirs()) }
-        val file = File(directory, "qr-code.png")
-        FileOutputStream(file).use { output ->
-            check(image.toBitmap().compress(Bitmap.CompressFormat.PNG, 100, output)) {
-                "QR image could not be saved"
+    suspend fun share(context: Context, image: QrImage) {
+        val file = withContext(Dispatchers.IO) {
+            shareMutex.withLock {
+                writeSharedQr(File(context.cacheDir, "shared")) { output ->
+                    ensureActive()
+                    val bitmap = image.toBitmap()
+                    try {
+                        check(bitmap.compress(Bitmap.CompressFormat.PNG, 100, output)) {
+                            "QR image could not be saved"
+                        }
+                    } finally {
+                        bitmap.recycle()
+                    }
+                    ensureActive()
+                }
             }
         }
-        val uri = FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", file)
-        val send =
-            Intent(Intent.ACTION_SEND).apply {
-                type = "image/png"
-                putExtra(Intent.EXTRA_STREAM, uri)
-                clipData = ClipData.newRawUri("QR code", uri)
-                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-            }
-        context.startActivity(Intent.createChooser(send, context.getString(R.string.share_qr_code)))
+        withContext(Dispatchers.Main.immediate) {
+            ensureActive()
+            val uri = FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", file)
+            val send =
+                Intent(Intent.ACTION_SEND).apply {
+                    type = "image/png"
+                    putExtra(Intent.EXTRA_STREAM, uri)
+                    clipData = ClipData.newRawUri("QR code", uri)
+                    addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                }
+            context.startActivity(Intent.createChooser(send, context.getString(R.string.share_qr_code)))
+        }
+    }
+}
+
+internal fun writeSharedQr(directory: File, write: (OutputStream) -> Unit): File {
+    check(directory.isDirectory || directory.mkdirs()) { "QR share directory could not be created" }
+    val cutoff = System.currentTimeMillis() - SHARE_MAX_AGE_MILLIS
+    val previous = checkNotNull(directory.listFiles()) { "QR share directory could not be read" }
+        .filter { it.isFile && it.name.startsWith("qr-code") && it.extension == "png" }
+        .sortedByDescending(File::lastModified)
+    previous.forEachIndexed { index, file ->
+        if (index >= MAX_SHARE_FILES - 1 || file.lastModified() < cutoff) {
+            check(file.delete()) { "Old QR share could not be removed" }
+        }
+    }
+    val file = File.createTempFile("qr-code-", ".png", directory)
+    try {
+        file.outputStream().use(write)
+        return file
+    } catch (failure: Throwable) {
+        if (!file.delete()) failure.addSuppressed(IOException("Incomplete QR share could not be removed"))
+        throw failure
     }
 }
 
 private const val QUIET_ZONE_MODULES = 4
 private const val MAX_QR_CONTENT_BYTES = 1200
+private const val MAX_SHARE_FILES = 8
+private const val SHARE_MAX_AGE_MILLIS = 24L * 60 * 60 * 1_000
 
 private fun isFinderModule(x: Int, y: Int, width: Int): Boolean =
     (x < 7 && y < 7) || (x >= width - 7 && y < 7) || (x < 7 && y >= width - 7)

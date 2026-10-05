@@ -112,8 +112,7 @@ class MainActivity : ComponentActivity() {
                 },
                 onClearLogo = { pickedLogo = null },
                 onShareImage = { image ->
-                    runCatching { QrRenderer.share(this, image) }
-                        .onFailure { actionError = getString(R.string.action_failed) }
+                    QrRenderer.share(this, image)
                 },
             )
         }
