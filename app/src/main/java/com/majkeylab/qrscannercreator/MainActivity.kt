@@ -34,11 +34,8 @@ class MainActivity : ComponentActivity() {
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             if (result.resultCode == Activity.RESULT_OK) {
                 result.data?.getStringExtra(ScannerActivity.EXTRA_RESULT)?.let { raw ->
-                    recordCompletedScan(this)
-                    showScanInterstitial(this) {
-                        scanResult = parseScanResult(raw)
-                        scanError = null
-                    }
+                    scanResult = parseScanResult(raw)
+                    scanError = null
                 }
             }
         }

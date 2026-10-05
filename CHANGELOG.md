@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.1.7 - 2026-10-05
+
+- Show decoded QR results immediately without a full-screen ad gate.
+- Remove unused interstitial preloading and scan/ad-frequency tracking.
+- Keep consent-gated banner ads, Premium, and purchase restoration.
+- Update privacy disclosures for current and older installed versions.
+
 ## 1.1.6 - 2026-10-03
 
 - Generate and share QR codes as native 2048 × 2048 PNG files instead of 1024 × 1024.

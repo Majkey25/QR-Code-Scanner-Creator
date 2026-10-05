@@ -1,6 +1,6 @@
 # Privacy policy
 
-Effective date: September 8, 2026
+Updated: October 5, 2026
 
 The canonical policy is published on [GitHub Pages](https://majkey25.github.io/QR-Code-Scanner-Creator/privacy.html), with source in [docs/privacy.html](docs/privacy.html).
 
@@ -36,7 +36,7 @@ Purchases belong to the Google Play account that bought them. Use Restore purcha
 
 ## Local storage and retention
 
-The app does not maintain a QR history or developer-operated cloud copy. Its settings store a completed-scan counter and last-ad timestamp to limit full-screen ad frequency. Google's advertising and consent components also manage their own on-device preferences and caches. Android manages temporary cache files. Clearing app data or uninstalling removes local app data, but does not cancel a subscription or remove copies held by Google or a sharing destination.
+The app does not maintain a QR history or developer-operated cloud copy. From version 1.1.7, scanning results are shown without full-screen ads and the app no longer records scan counters or ad timestamps. Earlier versions used those two local values to limit full-screen ad frequency; values left by an earlier installation can be removed by clearing app data. Google's banner advertising and consent components manage their own on-device preferences and caches. Android manages temporary cache files. Clearing app data or uninstalling removes local app data, but does not cancel a subscription or remove copies held by Google or a sharing destination.
 
 Google and any app you choose to open may retain data under their own policies.
 
