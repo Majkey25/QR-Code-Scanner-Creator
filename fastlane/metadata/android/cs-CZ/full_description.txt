@@ -22,9 +22,11 @@ Soukromí
 • Bez historie QR kódů a cloudového backendu.
 
 Zdarma a Premium
-• Bezplatná verze obsahuje střídmé bannerové reklamy.
-• Celoobrazovková reklama se zobrazí jen po dokončeném skenu a nejvýše jednou za pět minut.
-• Vyberte měsíční Premium nebo jeden doživotní nákup přes účet Google Play.
+• Bezplatná verze obsahuje bannerové reklamy.
+• Ve verzi 1.1.7 se výsledky skenování zobrazují bez celoobrazovkových reklam.
+• Volitelné QR Premium odstraní reklamy. Měsíční nebo doživotní variantu zakoupíte přes svůj účet Google Play.
+• Měsíční Premium se automaticky obnovuje, dokud jej nezrušíte v Google Play. Doživotní Premium je jednorázový nákup.
+• Cena se zobrazí před potvrzením nákupu.
 • Kde je to vyžadováno, aplikace nabízí souhlas Googlu a nastavení soukromí reklam.
 
 Vyžaduje Android 10 nebo novější.
