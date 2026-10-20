@@ -67,4 +67,21 @@ class ScanResultTest {
             parseScanResult(raw),
         )
     }
+
+    @Test
+    fun mailtoPreservesPlusAndDecodesPercentEscapesOnce() {
+        val raw = "mailto:jane+qr%2Btag@example.com?subject=C%2B%2B+notes&body=A%20B%252B%C4%8D"
+
+        assertEquals(
+            ScanResult.Email("jane+qr+tag@example.com", "C+++notes", "A B%2Bč", raw),
+            parseScanResult(raw),
+        )
+    }
+
+    @Test
+    fun invalidMailtoEscapeRemainsText() {
+        val raw = "mailto:jane@example.com?subject=%ZZ"
+
+        assertEquals(ScanResult.Text(raw), parseScanResult(raw))
+    }
 }
