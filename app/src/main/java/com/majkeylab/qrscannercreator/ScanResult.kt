@@ -275,6 +275,6 @@ private fun String.unescape(): String = buildString {
     if (escaped) append('\\')
 }
 
-private fun decode(value: String): String = URLDecoder.decode(value, "UTF-8")
+private fun decode(value: String): String = URLDecoder.decode(value.replace("+", "%2B"), "UTF-8")
 
 private val QR_DATE_TIME: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyyMMdd'T'HHmmss")
