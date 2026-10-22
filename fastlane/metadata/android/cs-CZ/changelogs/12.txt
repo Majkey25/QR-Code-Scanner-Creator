@@ -1,0 +1,1 @@
+Podepisování vydání nyní probíhá odděleně od sestavení aplikace, aby chránilo podpisový klíč.
