@@ -1,0 +1,1 @@
+Release signing now runs separately from app builds to protect the signing key.
