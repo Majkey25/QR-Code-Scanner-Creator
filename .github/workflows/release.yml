@@ -5,17 +5,21 @@ on:
     tags: ["v*"]
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
-  release:
-    name: Signed Android release
+  build:
+    name: Build unsigned Android artifacts
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    outputs:
+      artifact-id: ${{ steps.upload.outputs.artifact-id }}
 
     steps:
       - name: Check out source
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
       - name: Set up JDK 17
         uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5
@@ -28,35 +32,77 @@ jobs:
         with:
           cache-provider: basic
 
-      - name: Restore release signing key
-        env:
-          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
-        run: |
-          test -n "$ANDROID_KEYSTORE_BASE64"
-          printf '%s' "$ANDROID_KEYSTORE_BASE64" | base64 --decode > "$RUNNER_TEMP/qr-release.jks"
-
-      - name: Build signed artifacts
-        env:
-          ANDROID_KEYSTORE_FILE: ${{ runner.temp }}/qr-release.jks
-          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
-          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
-          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+      - name: Build unsigned artifacts
         run: |
           chmod +x gradlew
           ./gradlew testDebugUnitTest lintDebug assembleRelease bundleRelease --console=plain
 
-      - name: Prepare release files
+      - name: Upload unsigned artifacts
+        id: upload
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: unsigned-release
+          if-no-files-found: error
+          retention-days: 1
+          path: |
+            app/build/outputs/apk/release/app-release-unsigned.apk
+            app/build/outputs/bundle/release/app-release.aab
+
+  release:
+    name: Sign and publish Android release
+    needs: build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: write
+
+    steps:
+      - name: Set up JDK 17
+        uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Download unsigned artifacts
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          artifact-ids: ${{ needs.build.outputs.artifact-id }}
+          path: unsigned
+
+      - name: Sign release files
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
         run: |
+          set -euo pipefail
+          umask 077
+          keystore="$RUNNER_TEMP/qr-release.jks"
+          trap 'rm -f "$keystore"' EXIT
+          test -n "$ANDROID_KEYSTORE_BASE64"
+          printf '%s' "$ANDROID_KEYSTORE_BASE64" | base64 --decode > "$keystore"
+          build_tools="$ANDROID_HOME/build-tools/36.0.0"
           version="${GITHUB_REF_NAME#v}"
           mkdir release
-          cp app/build/outputs/apk/release/app-release.apk "release/QR-Code-Scanner-Creator-${version}.apk"
-          cp app/build/outputs/bundle/release/app-release.aab "release/QR-Code-Scanner-Creator-${version}.aab"
+          apk="release/QR-Code-Scanner-Creator-${version}.apk"
+          aab="release/QR-Code-Scanner-Creator-${version}.aab"
+          "$build_tools/apksigner" sign --ks "$keystore" --ks-key-alias "$ANDROID_KEY_ALIAS" \
+            --ks-pass env:ANDROID_KEYSTORE_PASSWORD --key-pass env:ANDROID_KEY_PASSWORD \
+            --v4-signing-enabled false --debuggable-apk-permitted false \
+            --out "$apk" unsigned/apk/release/app-release-unsigned.apk
+          "$build_tools/apksigner" verify "$apk"
+          jarsigner -keystore "$keystore" -storepass:env ANDROID_KEYSTORE_PASSWORD \
+            -keypass:env ANDROID_KEY_PASSWORD -signedjar "$aab" \
+            unsigned/bundle/release/app-release.aab "$ANDROID_KEY_ALIAS"
+          jarsigner -verify "$aab"
           cd release
           sha256sum * > SHA256SUMS.txt
 
       - name: Publish GitHub release
         env:
           GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
         run: |
           gh release create "$GITHUB_REF_NAME" release/* \
             --verify-tag \
