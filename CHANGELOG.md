@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.1.10 - 2026-10-24
+
+- Remove external coffee contributions from the Google Play edition while keeping them in GitHub APKs.
+- Link the Play edition to a separate privacy, terms, refund and cookie policy page.
+- Keep Premium purchases, purchase restoration and ad privacy controls unchanged.
+
 ## 1.1.8 - 2026-10-05
 
 - Prepare shared PNG files off the UI thread while preserving 2048 × 2048 output.

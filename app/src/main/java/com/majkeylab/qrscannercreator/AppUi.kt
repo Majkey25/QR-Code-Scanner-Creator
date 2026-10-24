@@ -540,29 +540,35 @@ private fun AboutDialog(onDismiss: () -> Unit) {
                 AboutLink(R.string.terms_and_policies) { uriHandler.openUri(TERMS_URL) }
                 PrivacyOptionsLink()
                 AboutLink(R.string.third_party_notices) { uriHandler.openUri(NOTICES_URL) }
-                AboutLink(R.string.source_code) { uriHandler.openUri(SOURCE_URL) }
-                Button(
-                    onClick = { uriHandler.openUri(SUPPORT_URL) },
-                    modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp),
-                    border = BorderStroke(1.dp, Color(0xFF111111)),
-                    colors =
-                        ButtonDefaults.buttonColors(
-                            containerColor = Color(0xFFFFDD00),
-                            contentColor = Color(0xFF111111),
-                        ),
-                ) {
-                    Icon(
-                        painterResource(R.drawable.ic_coffee),
-                        contentDescription = null,
-                        modifier = Modifier.size(22.dp),
+                AboutLink(R.string.source_code) {
+                    uriHandler.openUri(
+                        if (BuildConfig.ENABLE_DONATIONS) SOURCE_URL else "$SOURCE_URL/tree/main/app/src/main",
                     )
-                    Spacer(Modifier.size(10.dp))
-                    Text(stringResource(R.string.support_coffee))
                 }
-                Text(
-                    stringResource(R.string.support_coffee_note),
-                    style = MaterialTheme.typography.bodySmall,
-                )
+                if (BuildConfig.ENABLE_DONATIONS) {
+                    Button(
+                        onClick = { uriHandler.openUri(SUPPORT_URL) },
+                        modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp),
+                        border = BorderStroke(1.dp, Color(0xFF111111)),
+                        colors =
+                            ButtonDefaults.buttonColors(
+                                containerColor = Color(0xFFFFDD00),
+                                contentColor = Color(0xFF111111),
+                            ),
+                    ) {
+                        Icon(
+                            painterResource(R.drawable.ic_coffee),
+                            contentDescription = null,
+                            modifier = Modifier.size(22.dp),
+                        )
+                        Spacer(Modifier.size(10.dp))
+                        Text(stringResource(R.string.support_coffee))
+                    }
+                    Text(
+                        stringResource(R.string.support_coffee_note),
+                        style = MaterialTheme.typography.bodySmall,
+                    )
+                }
             }
         },
         confirmButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.close)) } },
@@ -644,7 +650,11 @@ internal fun QrTheme(content: @Composable () -> Unit) {
 }
 
 private const val SOURCE_URL = "https://github.com/Majkey25/QR-Code-Scanner-Creator"
-private const val PRIVACY_URL = "https://majkey25.github.io/QR-Code-Scanner-Creator/privacy.html"
-private const val TERMS_URL = "https://majkey25.github.io/QR-Code-Scanner-Creator/terms.html"
-private const val NOTICES_URL = "$SOURCE_URL/blob/main/THIRD_PARTY_NOTICES.md"
+private const val POLICY_BASE_URL = "https://majkey25.github.io/QR-Code-Scanner-Creator"
+internal val PRIVACY_URL =
+    if (BuildConfig.ENABLE_DONATIONS) "$POLICY_BASE_URL/privacy.html" else "$POLICY_BASE_URL/play.html#privacy"
+internal val TERMS_URL =
+    if (BuildConfig.ENABLE_DONATIONS) "$POLICY_BASE_URL/terms.html" else "$POLICY_BASE_URL/play.html#terms"
+internal val NOTICES_URL =
+    if (BuildConfig.ENABLE_DONATIONS) "$SOURCE_URL/blob/main/THIRD_PARTY_NOTICES.md" else "$POLICY_BASE_URL/play.html#notices"
 private const val SUPPORT_URL = "https://www.buymeacoffee.com/majkey"

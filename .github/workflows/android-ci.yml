@@ -38,7 +38,7 @@ jobs:
       - name: Run quality gate
         run: |
           chmod +x gradlew
-          ./gradlew testDebugUnitTest lintDebug assembleDebug bundleRelease --console=plain
+          ./gradlew testDebugUnitTest testReleaseUnitTest testGithubReleaseUnitTest lintDebug lintRelease lintGithubRelease assembleDebug assembleGithubRelease bundleRelease --console=plain
 
       - name: Upload CI outputs
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
@@ -48,5 +48,6 @@ jobs:
           retention-days: 14
           path: |
             app/build/outputs/apk/debug/app-debug.apk
+            app/build/outputs/apk/githubRelease/app-githubRelease-unsigned.apk
             app/build/outputs/bundle/release/app-release.aab
             app/build/reports/lint-results-debug.html

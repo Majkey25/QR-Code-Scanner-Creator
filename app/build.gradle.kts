@@ -13,8 +13,9 @@ android {
         applicationId = "com.majkeylab.qrscannercreator"
         minSdk = 29
         targetSdk = 37
-        versionCode = 12
-        versionName = "1.1.9"
+        versionCode = 13
+        versionName = "1.1.10"
+        buildConfigField("boolean", "ENABLE_DONATIONS", "false")
     }
 
     signingConfigs {
@@ -31,6 +32,7 @@ android {
     buildTypes {
         debug {
             manifestPlaceholders["admobAppId"] = "ca-app-pub-6991329209066655~5561017627"
+            buildConfigField("boolean", "ENABLE_DONATIONS", "true")
         }
         release {
             manifestPlaceholders["admobAppId"] = "ca-app-pub-6991329209066655~5561017627"
@@ -44,6 +46,11 @@ android {
             ndk {
                 debugSymbolLevel = "FULL"
             }
+        }
+        create("githubRelease") {
+            initWith(getByName("release"))
+            matchingFallbacks += listOf("release")
+            buildConfigField("boolean", "ENABLE_DONATIONS", "true")
         }
     }
 
