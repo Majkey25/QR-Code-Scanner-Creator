@@ -21,12 +21,18 @@
 - Photos: No broad permission; Android Photo Picker grants only the chosen logo or QR image
 - Storage: No permission; generated PNG uses temporary app cache and Android share sheet
 - Location: No location permission; coordinates can be entered or scanned as text
-- Privacy URL: https://majkey25.github.io/QR-Code-Scanner-Creator/privacy.html
+- Privacy URL: https://majkey25.github.io/QR-Code-Scanner-Creator/play.html#privacy
 - Support URL: https://github.com/Majkey25/QR-Code-Scanner-Creator/issues
 - Consent: Google UMP before ad requests where required; privacy-options entry point in About
 - QR data: Not collected or shared by the developer or advertising SDK
 
 ## Release verification
+
+Version 1.1.10 / code 13 separates distribution policies. The Play `release` variant excludes the external coffee button and contribution note. GitHub APKs use `githubRelease` and retain them. Play About links use [the standalone Play policy page](https://majkey25.github.io/QR-Code-Scanner-Creator/play.html); original GitHub-edition policy pages remain unchanged. Premium Billing, restoration and UMP controls are unchanged.
+
+Local verification on October 24 passed 50 unit tests in each of the debug, Play release and GitHub release variants, with no failures or skips. All three lint tasks reported 0 errors, 11 warnings and 1 hint. The unsigned Play AAB and GitHub APK assembled successfully with package `com.majkeylab.qrscannercreator`, version code 13 and version name 1.1.10. Inspection of their DEX content confirmed that the Play bundle excludes the coffee service URI and uses the standalone policy links, while the GitHub APK retains the service URI and original policy links. Runtime UI, real purchases and Google Play approval are separate checks, not proven by this local gate.
+
+Publish the Play policy page before submission, then set the Play Console privacy-policy URL above. Check the privacy-policy destination in the existing AdMob UMP consent message as well; that remote configuration is not determined by the app source. A successful build does not establish Google Play approval or a completed real purchase test.
 
 Version 1.1.5 / code 8 fixes Billing query ordering, purchase eligibility and ad shutdown. On September 8, all 39 unit tests, lint, debug APK and release AAB assembly passed for this version. Signed release artifacts are produced by the existing GitHub release workflow.
 

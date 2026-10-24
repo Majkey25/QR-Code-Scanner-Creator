@@ -35,7 +35,7 @@ jobs:
       - name: Build unsigned artifacts
         run: |
           chmod +x gradlew
-          ./gradlew testDebugUnitTest lintDebug assembleRelease bundleRelease --console=plain
+          ./gradlew testDebugUnitTest testReleaseUnitTest testGithubReleaseUnitTest lintDebug lintRelease lintGithubRelease assembleGithubRelease bundleRelease --console=plain
 
       - name: Upload unsigned artifacts
         id: upload
@@ -45,7 +45,7 @@ jobs:
           if-no-files-found: error
           retention-days: 1
           path: |
-            app/build/outputs/apk/release/app-release-unsigned.apk
+            app/build/outputs/apk/githubRelease/app-githubRelease-unsigned.apk
             app/build/outputs/bundle/release/app-release.aab
 
   release:
@@ -91,7 +91,7 @@ jobs:
           "$build_tools/apksigner" sign --ks "$keystore" --ks-key-alias "$ANDROID_KEY_ALIAS" \
             --ks-pass env:ANDROID_KEYSTORE_PASSWORD --key-pass env:ANDROID_KEY_PASSWORD \
             --v4-signing-enabled false --debuggable-apk-permitted false \
-            --out "$apk" unsigned/apk/release/app-release-unsigned.apk
+            --out "$apk" unsigned/apk/githubRelease/app-githubRelease-unsigned.apk
           "$build_tools/apksigner" verify "$apk"
           jarsigner -keystore "$keystore" -storepass:env ANDROID_KEYSTORE_PASSWORD \
             -keypass:env ANDROID_KEY_PASSWORD -signedjar "$aab" \
