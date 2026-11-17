@@ -5,7 +5,7 @@ QR Code Scanner & Creator includes these runtime libraries:
 - AndroidX Activity, CameraX, Compose, Core, Fragment, Lifecycle, and Material 3. Copyright The Android Open Source Project. Apache License 2.0.
 - Kotlin standard library. Copyright JetBrains s.r.o. and contributors. Apache License 2.0.
 - Google Play Billing Library 9.1.0. Copyright Google LLC. Android Software Development Kit License Agreement.
-- Google Mobile Ads Next-Gen SDK 1.4.0 and User Messaging Platform SDK 4.0.0. Copyright Google LLC. Android Software Development Kit License Agreement.
+- Google Mobile Ads Next-Gen SDK 1.6.0 and User Messaging Platform SDK 4.0.0. Copyright Google LLC. Android Software Development Kit License Agreement.
 - ZXing core 3.5.4. Copyright ZXing authors. Apache License 2.0.
 
 License texts and source links:
